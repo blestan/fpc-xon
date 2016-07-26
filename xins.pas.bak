@@ -31,6 +31,7 @@ type
                        FCount: Cardinal;        // nominal count of items
                        FPagesCount: Cardinal;   // number of pages allocated
                        FPages: PPointer;        // array of pointers to pages memory
+                       FParent: PXInstance;     // parent of the container - nil if this is the top container
 
              end;
 
@@ -53,8 +54,10 @@ type
                    xtBoolean: (FBool: Boolean);
                     xtString: (FStr: XONStr);
                    xtArray,
-                   xtObject:  ( FContainer: XContainer;
-                                FParent: PXInstance;     // nil if this is the top container
+                   xtObject:  ( FCount: Cardinal;
+                                FPagesCount: Cardinal;
+                                FPages: PPointer;
+                                FParent: PXInstance;
                                )
             end;
 

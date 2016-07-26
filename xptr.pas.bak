@@ -14,8 +14,8 @@ type
                         Delta = 16; // Array Grows by "Delta" buckets
                   private
                        FPages: PPointer;
-                    FPagesCount: Cardinal;
-                    FItemsCount: Cardinal;
+                    FPagesCount: Integer;
+                    FItemsCount: PtrUInt;
                     function PtrPtr(Index: PtrUInt): PPointer;
                     function GetPtr(Index:PtrUInt): Pointer;
                     procedure SetPtr(Index: PtrUInt; Value: Pointer);

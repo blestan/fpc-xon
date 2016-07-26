@@ -60,8 +60,6 @@ begin
      end;
 end;
 
-
-// strict json parsing - strings must be enclosed in ""
 function  TJSONParser.internal_parse(const js: string): integer;
 
 var       len,
