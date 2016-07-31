@@ -10,7 +10,7 @@ type
 
     XONStr = packed record
               private
-               const xstrInlineSize=6; // do not modify ... binary comptibility will be broken!
+               const xstrInlineSize=7; // do not modify ... binary comptibility will be broken!
                type
                 TXONStrType=(
                               xstNull=0, // Empty

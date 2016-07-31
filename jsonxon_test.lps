@@ -9,7 +9,7 @@
         <Filename Value="jsonxon_test.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
-        <CursorPos X="31" Y="10"/>
+        <CursorPos X="17" Y="6"/>
         <UsageCount Value="203"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -19,8 +19,8 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="7"/>
-        <CursorPos X="25" Y="72"/>
+        <TopLine Value="21"/>
+        <CursorPos X="59" Y="70"/>
         <UsageCount Value="203"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -28,54 +28,48 @@
       <Unit2>
         <Filename Value="xon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="49"/>
-        <CursorPos X="62" Y="36"/>
-        <UsageCount Value="171"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="64"/>
+        <CursorPos X="60" Y="79"/>
+        <UsageCount Value="177"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="xstr.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
-        <TopLine Value="40"/>
-        <CursorPos X="5" Y="75"/>
-        <UsageCount Value="184"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="66" Y="25"/>
+        <UsageCount Value="190"/>
       </Unit3>
       <Unit4>
         <Filename Value="xonjson.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="16"/>
-        <CursorPos X="27" Y="60"/>
-        <UsageCount Value="182"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="119"/>
+        <CursorPos X="33" Y="141"/>
+        <UsageCount Value="188"/>
       </Unit4>
       <Unit5>
         <Filename Value="xins.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="22"/>
-        <CursorPos X="91" Y="56"/>
-        <UsageCount Value="37"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="45"/>
+        <CursorPos X="73" Y="75"/>
+        <UsageCount Value="43"/>
       </Unit5>
       <Unit6>
         <Filename Value="xtypes.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="22" Y="35"/>
-        <UsageCount Value="37"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="43"/>
       </Unit6>
       <Unit7>
         <Filename Value="xptr.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="56" Y="17"/>
-        <UsageCount Value="70"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="73"/>
       </Unit7>
       <Unit8>
         <Filename Value="..\ParsePDF\PdfParse.pas"/>
@@ -160,127 +154,31 @@
         <UsageCount Value="10"/>
       </Unit20>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="6" HistoryIndex="5">
       <Position1>
-        <Filename Value="xon.pas"/>
-        <Caret Line="23" Column="51" TopLine="19"/>
+        <Filename Value="test_main.pas"/>
+        <Caret Line="95" Column="15" TopLine="85"/>
       </Position1>
       <Position2>
         <Filename Value="xon.pas"/>
-        <Caret Line="203" Column="46" TopLine="191"/>
+        <Caret Line="36" Column="26" TopLine="27"/>
       </Position2>
       <Position3>
         <Filename Value="xon.pas"/>
-        <Caret Line="282" Column="18" TopLine="251"/>
+        <Caret Line="114" Column="20" TopLine="106"/>
       </Position3>
       <Position4>
-        <Filename Value="xon.pas"/>
-        <Caret Line="46" Column="26" TopLine="28"/>
+        <Filename Value="test_main.pas"/>
+        <Caret Line="67" Column="24" TopLine="65"/>
       </Position4>
       <Position5>
         <Filename Value="xon.pas"/>
-        <Caret Line="220" Column="59" TopLine="202"/>
+        <Caret Line="113" Column="19" TopLine="52"/>
       </Position5>
       <Position6>
-        <Filename Value="xon.pas"/>
-        <Caret Line="219" Column="59" TopLine="215"/>
+        <Filename Value="test_main.pas"/>
+        <Caret Line="36" Column="25" TopLine="24"/>
       </Position6>
-      <Position7>
-        <Filename Value="test_main.pas"/>
-        <Caret Line="59" Column="26" TopLine="40"/>
-      </Position7>
-      <Position8>
-        <Filename Value="xon.pas"/>
-        <Caret Line="222" Column="8" TopLine="203"/>
-      </Position8>
-      <Position9>
-        <Filename Value="xon.pas"/>
-        <Caret Line="221" Column="67" TopLine="196"/>
-      </Position9>
-      <Position10>
-        <Filename Value="xon.pas"/>
-        <Caret Line="220" Column="20" TopLine="201"/>
-      </Position10>
-      <Position11>
-        <Filename Value="test_main.pas"/>
-        <Caret Line="63" Column="14" TopLine="37"/>
-      </Position11>
-      <Position12>
-        <Filename Value="xon.pas"/>
-        <Caret Line="230" Column="12" TopLine="209"/>
-      </Position12>
-      <Position13>
-        <Filename Value="xon.pas"/>
-        <Caret Line="226" Column="5" TopLine="209"/>
-      </Position13>
-      <Position14>
-        <Filename Value="xon.pas"/>
-        <Caret Line="49" Column="44" TopLine="31"/>
-      </Position14>
-      <Position15>
-        <Filename Value="xon.pas"/>
-        <Caret Line="232" Column="24" TopLine="213"/>
-      </Position15>
-      <Position16>
-        <Filename Value="test_main.pas"/>
-        <Caret Line="64" Column="68"/>
-      </Position16>
-      <Position17>
-        <Filename Value="test_main.pas"/>
-        <Caret Line="63" Column="61" TopLine="54"/>
-      </Position17>
-      <Position18>
-        <Filename Value="xins.pas"/>
-        <Caret Line="21" Column="29"/>
-      </Position18>
-      <Position19>
-        <Filename Value="xins.pas"/>
-        <Caret Line="65" Column="29" TopLine="46"/>
-      </Position19>
-      <Position20>
-        <Filename Value="xins.pas"/>
-        <Caret Line="83" Column="15" TopLine="64"/>
-      </Position20>
-      <Position21>
-        <Filename Value="xins.pas"/>
-        <Caret Line="85" Column="30" TopLine="65"/>
-      </Position21>
-      <Position22>
-        <Filename Value="xins.pas"/>
-        <Caret Line="86" Column="21" TopLine="67"/>
-      </Position22>
-      <Position23>
-        <Filename Value="xins.pas"/>
-        <Caret Line="100" Column="21" TopLine="81"/>
-      </Position23>
-      <Position24>
-        <Filename Value="xins.pas"/>
-        <Caret Line="30" Column="38" TopLine="11"/>
-      </Position24>
-      <Position25>
-        <Filename Value="xins.pas"/>
-        <Caret Line="74" Column="31" TopLine="43"/>
-      </Position25>
-      <Position26>
-        <Filename Value="xins.pas"/>
-        <Caret Line="105" Column="47" TopLine="74"/>
-      </Position26>
-      <Position27>
-        <Filename Value="xins.pas"/>
-        <Caret Line="135" Column="23" TopLine="104"/>
-      </Position27>
-      <Position28>
-        <Filename Value="xins.pas"/>
-        <Caret Line="27" Column="106"/>
-      </Position28>
-      <Position29>
-        <Filename Value="xins.pas"/>
-        <Caret Line="30" Column="31" TopLine="13"/>
-      </Position29>
-      <Position30>
-        <Filename Value="xins.pas"/>
-        <Caret Line="67" Column="7" TopLine="49"/>
-      </Position30>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

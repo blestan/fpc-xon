@@ -1,7 +1,7 @@
 program jsonxon_test;
 
 {$mode objfpc}{$H+}
-//{$AppType console}
+{$AppType console}
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,

@@ -60,6 +60,8 @@ begin
      end;
 end;
 
+
+// strict json parsing - strings must be enclosed in ""
 function  TJSONParser.internal_parse(const js: string): integer;
 
 var       len,
@@ -139,6 +141,7 @@ begin
              if (js[FPos]='"') and (js[FPos-1]<>'\') then break; // this is a non escaped quote - end of string found
             end;
            FXON:=XVar.Create(@js[StoredPos+1],FPos-StoredPos-1,FSuper);
+           writeln('parsed string:',FXON.AsString);
            inc(FPos);
            inc(Result);
           end;

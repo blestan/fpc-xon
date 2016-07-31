@@ -12,6 +12,7 @@ uses xtypes,xstr;
 
 type
              PXInstance=^XInstance;
+             PXContainer=^XContainer;
 
              // 32 bits header of each XON Instance
              XHeader=packed record
@@ -28,11 +29,15 @@ type
                              PagesDelta = 8;
                              ModMagic = PageSize-1;
                        private
-                       FCount: Cardinal;        // nominal count of items
-                       FPagesCount: Cardinal;   // number of pages allocated
-                       FPages: PPointer;        // array of pointers to pages memory
-                       FParent: PXInstance;     // parent of the container - nil if this is the top container
-
+                        FInternalSize: Cardinal;
+                        FCount: Cardinal;        // nominal count of items
+                        FPagesCount: Cardinal;   // number of pages allocated
+                        FPages: PPointer;        // array of pointers to pages memory
+                        function Expand:PXInstance;
+                       public
+                        class function New(ASize:Cardinal): PXContainer;static;
+                        procedure Finalize;
+                        function GetChildPtr(Index: Cardinal): PXInstance;
              end;
 
 
@@ -41,23 +46,21 @@ type
                  function InstanceType: XType;
                  class function Size:Cardinal;static; // instance size of test purposes
                  function Count: Cardinal;
-                 function Expand:PXInstance;
                  function Deleted:boolean;
                  function Modified: boolean;
                  function isRoot:boolean;inline;
-                 function GetChildPtr(Index: Cardinal): PXInstance;
                  procedure Initialize(AType: XType; AParent: PXInstance=nil);
                  procedure Finalize;
+                 function AllocChild: PXInstance;
+                 procedure InitContainer(InitialSize:Cardinal);
                  case  Integer of
                    xtInteger: (FInt: XInt);
                      xtFloat: (FFloat: XFloat);
                    xtBoolean: (FBool: Boolean);
                     xtString: (FStr: XONStr);
                    xtArray,
-                   xtObject:  ( FCount: Cardinal;
-                                FPagesCount: Cardinal;
-                                FPages: PPointer;
-                                FParent: PXInstance;
+                   xtObject:  ( FContainer: PXContainer;
+                                FParent: PXInstance;     // nil if this is the top container
                                )
             end;
 
@@ -73,6 +76,65 @@ implementation
 var  DivMagic:Cardinal;
 
 
+// XCOntainer
+
+class function XContainer.New(ASize: Cardinal): PXContainer;
+begin
+  Result:=GetMem(SizeOf(XContainer)+(ASize*XInstance.Size));
+  with Result^ do
+   begin
+     FInternalSize:=ASize;
+     FCount:=00;
+     FPagesCount:=00;
+     FPages:=nil;
+   end;
+end;
+
+procedure XContainer.Finalize;
+var i: Cardinal;
+begin
+  if FCount>0 then
+    for i:=0 to FCount-1 do GetChildPtr(i)^.Finalize;
+  if FPagesCount>0 then
+   begin
+    for i:=0 to FPagesCount-1 do FreeMem(FPages[i]);
+    FreeMem(FPages);
+    FPages:=nil;
+    FPagesCount:=00;
+   end;
+  FCount:=00;
+end;
+
+function XContainer.GetChildPtr(Index: Cardinal): PXInstance;
+begin
+  if FCount=0 then exit(nil);
+  if Index>=FCount then exit(nil);
+  if Index in [00.. FInternalSize-1] then
+   begin
+     Result:=@self;
+     inc(Pointer(Result),SizeOf(XContainer));
+     Result:=@Result[Index];
+   end
+   else
+    begin
+      Dec(Index,FInternalSize);
+      Result:= @PXInstance(FPages[Index shr DivMagic])[Index and ModMagic];
+    end;
+end;
+
+function XContainer.Expand:PXInstance;
+procedure Grow;
+begin
+    if FPagesCount mod PagesDelta = 0 then FPages:=ReallocMem(FPages,(FPagesCount+PagesDelta)*SizeOf(PXInstance));
+    FPages[FPagesCOunt]:=GetMem(PageSize*XInstance.Size); // to do: alloc new pages from pool to avoid memory fragmentation
+    Inc(FPagesCount);
+end;
+begin
+   Inc(FCount);
+   if FCount-FInternalSize>=FPagesCount*PageSize then Grow;
+   Result:=GetChildPtr(FCount-1);
+end;
+
 // XInstance functions
 
 function XInstance.InstanceType: XType;inline;
@@ -85,11 +147,11 @@ begin
   Result:=Sizeof(XInstance);
 end;
 
-function XInstance.GetChildPtr(Index: Cardinal): PXInstance;inline;
+function XInstance.AllocChild: PXInstance;
 begin
-    Result:= @PXInstance(FPages[Index shr DivMagic])[Index and ModMagic]
+  if FContainer=nil then FContainer:=XContainer.New(XContainer.PageSize);
+  Result:=FContainer^.Expand;
 end;
-
 
 procedure XInstance.Initialize(AType: XType; AParent: PXInstance=nil);
 begin
@@ -100,52 +162,35 @@ begin
      xtString: FStr.Initialize;
      xtObject,xtArray: begin
                         FParent:=AParent;
-                        FCount:=0;
-                        FPages:=nil;
-                        FPagesCount:=0;
+                        FContainer:=nil;
                        end;
  end
 end;
 
 procedure XInstance.Finalize;
-var i: Cardinal;
 begin
  case XType(FHeader.FType) of
      xtString: FStr.Finalize;
-     xtObject,xtArray: if FCOunt>0 then
-         begin
-           for i:=0 to FCount-1 do GetChildPtr(i)^.Finalize;
-           for i:=0 to FPagesCount-1 do FreeMem(FPages[i]);
-           FCount:=0;
-           FreeMem(FPages);
-           FPages:=nil;
-           FPagesCount:=0
-         end;
+     xtObject,xtArray: if FContainer<>nil then
+                         begin
+                          FContainer^.Finalize;
+                          Freemem(FContainer);
+                          FContainer:=nil;
+                         end;
  end;
 end;
 
 function XInstance.Count: Cardinal;
 begin
   case InstanceType of
-   xtObject: Result:=FCount div 2; // half of the vars are keys
-    xtArray: Result:=FCount;
+   xtObject: if FContainer<>nil then Result:=FContainer^.FCount div 2 // half of the vars are keys
+                                else Result:=0;
+    xtArray: if FContainer<>nil then Result:=FContainer^.FCount
+                                else Result:=0;
     else Result:=0;
   end
 end;
 
-
-function XInstance.Expand:PXInstance;
-procedure Grow;
-begin
-    if FPagesCount mod PagesDelta = 0 then FPages:=ReallocMem(FPages,(FPagesCount+PagesDelta)*SizeOf(PXInstance));
-    FPages[FPagesCOunt]:=GetMem(PageSize*Size); // to do: alloc new pages from pool to avoid memory fragmentation
-    Inc(FPagesCount);
-end;
-begin
-   Inc(FCount);
-   if FCount>=FPagesCount*PageSize then Grow;
-   Result:=GetChildPtr(FCount-1);
-end;
 
 function XInstance.isRoot:boolean;inline;
 begin
@@ -164,6 +209,6 @@ end;
 
 
 initialization
- DivMagic := BsrDWord(PageSize);
+ DivMagic := BsrDWord(XContainer.PageSize);
 end.
 

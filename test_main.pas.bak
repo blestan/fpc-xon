@@ -68,7 +68,7 @@ begin
 end;
 
 begin
-  Caption:=IntToStr(Sizeof(XONStr));
+  Caption:=IntToStr(Sizeof(XOnstr);
   LogOutput.Lines.Clear;
   s:=JsonMemo.Text;
   parser:= TJSONParser.Create;

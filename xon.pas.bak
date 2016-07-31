@@ -12,7 +12,7 @@ unit xon;
 
 interface
 
-uses xtypes,xins;
+uses xtypes,xins,xstr;
 
 type
 
