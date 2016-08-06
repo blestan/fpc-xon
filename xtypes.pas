@@ -15,10 +15,8 @@ type
                xtObject,
                xtArray,
             // extra types
-               xtIdentifier,
                xtBinary,
-               xtDateTime,
-               xtHash
+               xtDateTime
  );
 
  // Number types
@@ -39,10 +37,8 @@ begin
                xtString: Result:='String';
                xtObject: Result:='Object';
                xtArray: Result:='Array';
-               xtIdentifier: Result:='Identifier';
                xtBinary: Result:='Binary';
                xtDateTime: Result:='DateTime';
-               xtHash: Result:='Hash';
 
   end;
 end;

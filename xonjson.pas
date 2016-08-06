@@ -22,6 +22,7 @@ type
                   function internal_Parse(const js: string): integer;
                 public
                   constructor Create;
+                  destructor Destroy;override;
                   function Parse(const js: string): integer;
                   procedure Reset;
                   property Position: Cardinal read FPos;
@@ -41,6 +42,12 @@ begin
    FPos:=0;
 end;
 
+destructor TJSONParser.Destroy;
+begin
+ Reset;
+ Inherited Destroy;
+end;
+
 procedure TJSONParser.Reset;
 begin
    FSuper:=XVar.Null;
@@ -56,7 +63,7 @@ begin
    if (Result<0) and (FDepth>0) then // on error unwind back to the topmost container to avoid mem leaks
      begin
       FXON:=FSuper;
-      while FXON.Parent.isValid do FXON.Parent;
+       while FXON.asArray.Parent.Assigned do FXON:=FXON.AsArray.Parent;
      end;
 end;
 
@@ -67,7 +74,6 @@ function  TJSONParser.internal_parse(const js: string): integer;
 var       len,
    StoredPos : Cardinal;
             r: integer;
-ValueExpected: Boolean;
 
 
 function skip:boolean;inline;
@@ -117,8 +123,16 @@ begin
 
   if not (js[Fpos] in [#0..#32,',',']','}','0'..'9']) then exit(JSON_ERROR_INVAL);
 
-  if fract=0 then FXON:=XVar.Create(Sign*Int,FSuper)
-             else FXON:=XVar.Create(Sign*(Int+(Fract/Pow10)),FSuper);
+  if fract=0 then
+              begin
+               FXON:=XVar.New(xtInteger,FSuper);
+               FXON.AsInteger:=Sign*Int;
+              end
+             else
+              begin
+               FXON:=XVar.New(xtFloat,FSuper);
+               FXON.AsFloat:=Sign*(Int+(Fract/Pow10));
+              end;
 
   Result:=JSON_ERROR_NONE
 end;
@@ -127,7 +141,6 @@ begin
   Result:=0;
   len:=Length(js);
   FPos:=1;
-  ValueExpected:=False;
   while FPos<=len do
     begin
      case js[FPos] of
@@ -140,26 +153,21 @@ begin
              if FPos<=len then inc(FPos) else exit(JSON_ERROR_PARTIAL); // end of string reached but no closing quote found
              if (js[FPos]='"') and (js[FPos-1]<>'\') then break; // this is a non escaped quote - end of string found
             end;
-           FXON:=XVar.Create(@js[StoredPos+1],FPos-StoredPos-1,FSuper);
+           FXON:=XVar.New(xtString,FSuper);
+           FXON.SetString(@js[StoredPos+1],FPos-StoredPos-1);
            inc(FPos);
            inc(Result);
           end;
 
-     ',': if not (FSuper.DataType in [xtArray,xtObject]) then exit(JSON_ERROR_INVAL)
-             else begin
-               ValueExpected:=False;
-               inc(FPos);
-             end;
+     ',': if not (FSuper.isContainer) then exit(JSON_ERROR_INVAL)
+             else inc(FPos);
 
-       ':': if (FSuper.DataType<>xtObject) and ValueExpected then exit(JSON_ERROR_INVAL)
-              else
-                begin
-                ValueExpected:=True;
-                inc(FPos);
-              end;
+     ':': if (FSuper.VarType<>xtObject) then exit(JSON_ERROR_INVAL)
+              else inc(FPos);
+
 
      '[': begin
-               FXON:=XVar.CreateArray(FSuper);
+               FXON:=XVar.New(xtArray,FSuper);
                FSuper:=FXON;
                inc(Fpos);
                inc(Result);
@@ -168,14 +176,14 @@ begin
 
 
      '{': begin
-            FXON:=XVar.CreateObject(FSuper);
+            FXON:=XVar.New(xtObject,FSuper);
             FSuper:=FXON;
             inc(Fpos);
             inc(Result);
             inc(FDepth)
           end;
 
-     ']','}':  if FSuper.DataType in [xtObject,xtArray] then
+     ']','}':  if FSuper.isContainer then
                    begin
                     Dec(FDepth);
                     if FDepth=0 then // we are closing the last container
@@ -185,7 +193,7 @@ begin
                      end
                      else
                       begin
-                       FSuper:=FSuper.Parent;
+                       FSuper:=FSuper.AsArray.Parent;
                        Inc(FPos);
                       end
                    end
@@ -204,7 +212,8 @@ begin
                if FPos>len then exit(JSON_ERROR_PARTIAL);
                if js[Fpos] in ['E','e'] then inc(FPos)
                                       else exit(JSON_ERROR_INVAL);
-               FXON:=XVar.Create(False,FSuper);
+               FXON:=XVar.New(xtBoolean,FSuper);
+               FXON.AsBoolean:=False;
                inc(Result);
        end;
 
@@ -218,7 +227,7 @@ begin
                if FPos>len then exit(JSON_ERROR_PARTIAL);
                if js[Fpos] in ['L','l'] then inc(FPos)
                                         else exit(JSON_ERROR_INVAL);
-               FXON:=XVar.Create(FSuper);
+               FXON:=XVar.New(xtNull,FSuper);
                inc(Result);
               end;
 
@@ -232,7 +241,8 @@ begin
                  if FPos>len then exit(JSON_ERROR_PARTIAL);
                  if js[Fpos] in ['E','e'] then inc(FPos)
                                        else exit(JSON_ERROR_INVAL);
-                FXON:=XVar.Create(True,FSuper);
+                FXON:=XVar.New(xtBoolean,FSuper);
+                FXON.AsBoolean:=True;
                 inc(Result);
                end;
       '+','-',

@@ -1,11 +1,13 @@
 object Form1: TForm1
-  Left = 652
+  Left = 730
   Height = 374
-  Top = 157
+  Top = 156
   Width = 1005
   Caption = 'Form1'
   ClientHeight = 374
   ClientWidth = 1005
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   LCLVersion = '1.6.0.4'
   object LogOutput: TMemo
     Left = 0
@@ -18,58 +20,79 @@ object Form1: TForm1
     )
     ReadOnly = True
     ScrollBars = ssAutoVertical
-    TabOrder = 1
-  end
-  object JsonMemo: TMemo
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideRight.Control = ParseBtn
-    Left = 8
-    Height = 250
-    Top = 24
-    Width = 368
-    Anchors = [akTop, akLeft, akRight, akBottom]
-    BorderSpacing.Right = 8
-    Lines.Strings = (
-      ''
-    )
-    ScrollBars = ssAutoVertical
-    TabOrder = 2
-  end
-  object LoadBtn: TButton
-    Left = 384
-    Height = 25
-    Top = 24
-    Width = 75
-    Caption = 'Load JSON...'
-    OnClick = LoadBtnClick
-    TabOrder = 3
-  end
-  object XONTree: TTreeView
-    AnchorSideLeft.Control = ParseBtn
-    AnchorSideLeft.Side = asrBottom
-    AnchorSideRight.Side = asrBottom
-    Left = 467
-    Height = 248
-    Top = 24
-    Width = 529
-    Anchors = [akTop, akLeft, akRight, akBottom]
-    BorderSpacing.Left = 8
-    DefaultItemHeight = 18
-    ScrollBars = ssAutoVertical
-    TabOrder = 4
-  end
-  object ParseBtn: TButton
-    Left = 384
-    Height = 25
-    Top = 56
-    Width = 75
-    Caption = 'Parse'
-    OnClick = ParseBtnClick
     TabOrder = 0
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 280
+    Top = 0
+    Width = 512
+    Align = alClient
+    Caption = 'Panel1'
+    ClientHeight = 280
+    ClientWidth = 512
+    TabOrder = 1
+    object LoadBtn: TButton
+      Left = 384
+      Height = 25
+      Top = 24
+      Width = 75
+      Anchors = [akTop, akRight]
+      Caption = 'Load JSON...'
+      OnClick = LoadBtnClick
+      TabOrder = 0
+    end
+    object ParseBtn: TButton
+      Left = 384
+      Height = 25
+      Top = 56
+      Width = 75
+      Anchors = [akTop, akRight]
+      Caption = 'Parse'
+      OnClick = ParseBtnClick
+      TabOrder = 1
+    end
+    object JSONMemo: TMemo
+      Left = 1
+      Height = 278
+      Top = 1
+      Width = 351
+      Align = alLeft
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      Lines.Strings = (
+        'JSONMemo'
+      )
+      TabOrder = 2
+    end
+  end
+  object Panel2: TPanel
+    Left = 512
+    Height = 280
+    Top = 0
+    Width = 493
+    Align = alRight
+    Caption = 'Panel2'
+    ClientHeight = 280
+    ClientWidth = 493
+    TabOrder = 2
+    OnClick = Panel2Click
+    object XONTree: TTreeView
+      Left = 1
+      Height = 278
+      Top = 1
+      Width = 491
+      Align = alClient
+      DefaultItemHeight = 18
+      ScrollBars = ssAutoVertical
+      TabOrder = 0
+      OnClick = XONTreeDblClick
+      OnMouseDown = XONTreeMouseDown
+    end
   end
   object OpenDialog1: TOpenDialog
     DefaultExt = '.json'
     Filter = 'JSON|*.json'
+    Options = [ofOldStyleDialog, ofEnableSizing, ofViewDetail]
     left = 48
     top = 48
   end
