@@ -28,66 +28,43 @@ XVar =  record
            procedure SetInteger(AValue: XInt);
            function GetFloat: XFloat;
            procedure SetFloat(AValue: XFloat);
+
+           function GetVar(index: Cardinal): XVar;overload;
+           function GetVar(const index: string): XVar;overload;
+           function GetKey(index: Cardinal): XVar;
+
          public
            const Null: XVar =( FInstance : Nil);
-           class function InstanceSize: Cardinal;static;
-           class function New(AType: XType; AParent: XVar): XVar;static; // Create New Variable
-           procedure Free;
+
            function VarType: XType;
+
+           class function InstanceSize: Cardinal;static;
+
+           class function New(AType: XType):XVar;static; //Create New ROOT Variable
+           class function New(AType: XType; AParent: XVar): XVar;static; // Create New Variable
+           function Add(AType: XType): XVar; // Add new child in Array
+           function Add(AType: XType;const AKey:String=''): XVar; // Add new child in Object
+           procedure Free;
+
            function Assigned:boolean;
-           function Deleted:boolean;
-           function Modified: boolean;
-           function isContainer: boolean;
-           function IsNumeric: Boolean;
-           function IsNull: Boolean;
+
+           function Count: Cardinal;
+           function Parent: XVar;
+
            procedure SetString(AValue: PChar; Size: Cardinal);overload;
            property AsInteger: XInt read GetInteger write SetInteger;
            property AsBoolean: Boolean read GetBoolean write SetBoolean;
            property AsString: String read GetString write SetString;
            property AsFloat: XFloat read GetFloat write SetFloat;
-         end;
-
-
-XObject = record
-          private
-           FInstance: PXInstance;
-           function GetItemByKey(const S: String): XVar;
-           function GetVar(Index: Cardinal): XVar;
-           function GetKey(Index: Cardinal): XVar;
-          public
-           const Null: XObject =( FInstance : Nil);
-           function VarType: XType;
-           function Assigned:boolean;
-           function Count: Cardinal;
-           function Parent: XVar;
-           function Add(AType: XType;const AKey:String=''): XVar;
-           property ItemByKey[const S: String]: XVar read GetItemByKey;default;
-           property Vars[Index: Cardinal]: XVar read GetVar;
+           property Vars[index: cardinal]: XVar read GetVar;default;
            property Keys[Index: Cardinal]: XVar read GetKey;
-end;
 
-XArray = record
-          Private
-           FInstance: PXInstance;
-           function GetVar(Index: Cardinal): XVar;
-          public
-           const Null: XArray = ( FInstance : Nil);
-           function VarType: XType;
-           function Assigned:boolean;
-           function Count: Cardinal;
-           function Parent: XVar;
-           function Add(AType: XType): XVar;
-           property Vars[Index: Cardinal]: XVar read GetVar;default;
-end;
-
-
-XVarHelper = record helper for XVAR
-               function AsObject: XObject;
-                function AsArray: XArray;
-end;
-
-operator := (AnArray: XArray) : XVar;
-operator := (AnObject: XObject) : XVar;
+           function Deleted:boolean;
+           function Modified: boolean;
+           function isContainer: boolean;
+           function IsNumeric: Boolean;
+           function IsNull: Boolean;
+         end;
 
 resourcestring
 
@@ -111,6 +88,12 @@ end;
 
 
 // create a root
+class function XVar.New(AType: XType): XVar;inline;
+begin
+  Result.FInstance:=XInstance.New(AType,nil);
+end;
+
+// create child
 class function XVar.New(AType: XType; AParent: XVar): XVar;inline;
 begin
  Result.FInstance:=XInstance.New(AType,AParent.FInstance);
@@ -175,7 +158,7 @@ begin
       xtNull: Result:=0;
       xtInteger: Result:= FInstance^.FInt;
    xtBoolean: Result:= Ord(FInstance^.FBool);
-     xtFloat: Result:= Trunc(FInstance^.FFloat);
+     xtFloat: Result:= Round(FInstance^.FFloat);
   end;
 end;
 
@@ -251,128 +234,65 @@ begin
               else Result:=False;
 end;
 
-function XVarHelper.AsObject: XObject;inline;
+function XVar.Count: Cardinal; Inline;
 begin
-  if VarType=xtObject then Result.FInstance:=FInstance
-                       else Result:=XObject.Null;
+  if isContainer then Result:=FInstance^.Count
+                 else Result:=0;
 end;
 
-
-function XVarHelper.AsArray: XArray;inline;
+function XVar.Parent: XVar;inline;
 begin
-  //XObjects also can be typecasted to arrays
-  if (VarType=xtArray) or (VarType=xtObject) then Result.FInstance:=FInstance
-                                             else Result:=XArray.Null;
+ if isContainer then Result.FInstance:=FInstance^.FParent
+                else Result:=null;
 end;
 
-
-// XArray
-operator := ( AnArray: XArray): XVar;inline;
-begin
- Result.FInstance:=AnArray.FInstance;
-end;
-
-function XArray.Assigned: boolean; Inline;
-begin
- Result:=FInstance<>nil;
-end;
-
-function XArray.Count: Cardinal; Inline;
-begin
-  if Assigned then Result:=FInstance^.Count
-              else Result:=0;
-end;
-
-function XArray.Parent: XVar;inline;
-begin
- if Assigned then Result.FInstance:=FInstance^.FParent
-             else Result:=null;
-end;
-
-function XArray.VarType: XType; inline;
-begin
-  if Assigned then Result := FInstance^.InstanceType
-              else Result := xtNull;
-end;
-
-function XArray.GetVar(Index: Cardinal): XVar;
-begin
-   if Assigned then Result.FInstance:=FInstance^.FContainer^.ItemPtr(Index)
-               else Result:=XVar.Null;
-end;
-
-function XArray.Add(AType: XType): XVar;
-begin
-  if Assigned then Result.FInstance:=XInstance.New(AType,FInstance)
-              else raise EXONException.Create(XON_Expand_Exception);
-end;
-
-// XObject
-
-operator := ( AnObject: XObject): XVar;inline;
-begin
-  Result.FInstance:=AnObject.FInstance;
-end;
-
-function XObject.Assigned: boolean; Inline;
-begin
- Result:=FInstance<>nil;
-end;
-
-function XObject.Count: Cardinal; Inline;
-begin
- if Assigned then Result:=FInstance^.Count
-             else Result:=0;
-end;
-
-function XObject.Parent: XVar;inline;
-begin
- if Assigned then Result.FInstance:=FInstance^.FParent
-             else Result:=null;
-end;
-
-function XObject.VarType: XType; inline;
-begin
-  if Assigned then Result := xtObject
-              else Result := xtNull;
-end;
-
-function XObject.GetVar(Index: Cardinal): XVar;
-begin
-  if Assigned then Result.FInstance:=FInstance^.FContainer^.ItemPtr(Succ(Index shl 1))
-              else Result:=XVar.Null;
-end;
-
-function XObject.GetKey(Index: Cardinal): XVar;
-begin
- if Assigned then Result.FInstance:=FInstance^.FContainer^.ItemPtr(Index shl 1)
-             else Result:=XVar.Null;
-end;
 
 // linear search in object
-function XObject.GetItemByKey(const S: String): XVar;
+function XVar.GetVar(const Index: String): XVar;
 var i: integer;
 begin
  Result:=XVar.Null;
+ if VarType<>xtObject then exit;
  for i:=00 to Count-1 do
-  if Keys[i].AsString=S then
+  if Keys[i].AsString=Index then
     begin
       Result:=Vars[i];
       Break
     end;
 end;
 
-function XObject.Add(AType: XType;const AKey:String=''): XVar;
+
+function XVar.GetVar( Index: Cardinal): XVar;
 begin
-  if Assigned then
+ case VarType of
+  xtArray: Result.FInstance:=FInstance^.FContainer^[Index];
+  xtObject: Result.FInstance:=FInstance^.FContainer^[Succ(Index shl 1)];
+  else Result:=XVar.Null
+ end
+end;
+
+
+function XVar.GetKey(Index: Cardinal): XVar;
+begin
+ if VarType=xtObject then Result.FInstance:=FInstance^.FContainer^[Index shl 1]
+                      else Result:=XVar.Null;
+end;
+
+function XVar.Add(AType: XType): XVar;
+begin
+  if VarType=xtArray then Result.FInstance:=XInstance.New(AType,FInstance)
+                      else raise EXONException.Create(XON_Expand_Exception);
+end;
+
+function XVar.Add(AType: XType;const AKey:String=''): XVar;
+begin
+  if VarType=xtObject then
     begin
       if AKey<>'' then XInstance.New(xtString,FInstance)^.FStr.SetStr(AKey);
        Result.FInstance:=XInstance.New(AType,FInstance);
     end
      else Raise EXONException.Create(XON_Expand_Exception);
 end;
-
-initialization
 
 end.
 

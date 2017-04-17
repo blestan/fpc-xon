@@ -6,7 +6,7 @@ interface
 
 type
 
- XType =  ( // basic types
+ XType =  ( // basic types - use only the lower 5 bits - max 32 types!!!
                xtNull= 0,
                xtInteger,
                xtFloat,
@@ -15,12 +15,13 @@ type
                xtObject,
                xtArray,
             // extra types
+               xtInt64,
                xtBinary,
                xtDateTime
  );
 
  // Number types
- XFloat = Double;
+ XFloat = Single;
  XInt = Integer;
 
  function XTypeName( AType: XType): String;

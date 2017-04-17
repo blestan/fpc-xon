@@ -1,5 +1,5 @@
 {
-  Internal XON Sructures
+  XON Instance - Internal XON Sructures
 }
 unit xins;
 
@@ -10,27 +10,28 @@ interface
 
 uses xtypes;
 
-const
-
-   XStrInlineSize=9; // do not modify ... binary comptibility will be broken!
-
 type
              PXInstance=^XInstance;
              PXContainer=^XContainer;
 
              // XON Instance Header
              XHeader=packed record
-                    FType,        //  var type
-                    FAttr: Byte  // extra flags
+                    FType,      //  var type
+                    FAttr: byte  // extra flags
              end;
 
              XStr = packed record
+                    const
+                        InlineSz=9; // do not modify ... binary persistance comptibility will be broken!
+                    private
                         FLen: Byte;
+                    public
                         Procedure SetStr(const S: String);overload;
                         Procedure SetStr (P: PChar; Len: Integer);overload;
                         Function GetStr: String;
+                    private
                      case integer of
-                        0: ( FChars: array[01..XStrInlineSize] of char); //  inline characters
+                        0: ( FChars: array[01..InlineSz] of char); //  inline characters
                         1: ( FNative: Pointer); // fpc string
               end;
 
@@ -46,10 +47,12 @@ type
                          FPagesCount: Cardinal;   // number of pages allocated
                          FPages: PPointer;        // array of pointers to pages memory
                          function Expand:PXInstance;
+                         function GetInstance(Index: Cardinal): PXInstance;
                        public
                         class function New(ASize:Cardinal): PXContainer;static;
                         procedure Finalize;
-                        function ItemPtr(Index: Cardinal): PXInstance;
+                        property  Items[index: cardinal]: PXInstance read GetInstance;default;
+
              end;
 
              XInstance = packed record
@@ -61,11 +64,12 @@ type
                  function Deleted:boolean;
                  function Modified: boolean;
                  function isRoot:boolean;inline;
-                 procedure Initialize(AType: XType; AParent: PXInstance=nil);
+                 procedure Init(AType: XType; AParent: PXInstance=nil);
                  procedure Finalize;
-                 function AllocItem: PXInstance;
+                 function AddItem: PXInstance;
                  function Count: Cardinal;
                  procedure InitContainer(InitialSize:Cardinal);
+                 function StrType: Cardinal;
                  case  Integer of
                    xtInteger: (FInt: XInt);
                      xtFloat: (FFloat: XFloat);
@@ -84,6 +88,12 @@ implementation
                     FlagKey =  %01000000;
                 FlagDeleted =  %00100000;
                FlagModified =  %00010000;
+
+
+               FlagInlineStr =  %00000001;
+                 FlagBuffStr =  %00000010;
+               FlagNativeStr =  %00000011;
+
 
 
 var  DivMagic:Cardinal;
@@ -106,7 +116,7 @@ procedure XContainer.Finalize;
 var i: Cardinal;
 begin
   if FCount>0 then
-    for i:=0 to FCount-1 do ItemPtr(i)^.Finalize;
+    for i:=0 to FCount-1 do GetInstance(i)^.Finalize;
   if FPagesCount>0 then
    begin
     for i:=0 to FPagesCount-1 do FreeMem(FPages[i]);
@@ -117,7 +127,7 @@ begin
   FCount:=00;
 end;
 
-function XContainer.ItemPtr(Index: Cardinal): PXInstance;
+function XContainer.GetInstance(Index: Cardinal): PXInstance;
 begin
   if FCount=0 then exit(nil);
   if Index>=FCount then exit(nil);
@@ -144,15 +154,15 @@ begin
      FPages[FPagesCOunt]:=GetMem(PageSize*XInstance.Size); // to do: alloc new pages from a pool to avoid memory fragmentation
      Inc(FPagesCount)
     end;
-   Result:=ItemPtr(FCount-1);
+   Result:=GetInstance(FCount-1);
 end;
 
 // XStr
 
 procedure XStr.SetStr(P: PChar; Len: Integer);
 begin
- if FLen>XStrInlineSize then RawByteString(FNative):=''; // release previous string if any
- if Len<XStrInlineSize  then
+ if FLen>InlineSz then RawByteString(FNative):=''; // release previous string if any
+ if Len<InlineSz  then
   begin
    FLen:=Len;
    if Len<>0 then Move(P^,FChars[1],FLen);
@@ -169,9 +179,9 @@ end;
 procedure XStr.SetStr(const S:String);inline;
 Var Len: Cardinal;
 begin
-  if FLen>XStrInlineSize then RawByteString(FNative):=''; // release previous string if any
+  if FLen>InlineSz then String(FNative):=''; // release previous string if any
   Len:=System.Length(S);
-  if Len<XStrInlineSize  then
+  if Len<InlineSz  then
   begin
    FLen:=Len;
    if Len<>0 then Move(S[1],FChars[1],FLen);
@@ -186,12 +196,12 @@ end;
 Function XStr.GetStr: String;
 begin
  if FLen=0 then exit;
- if FLen<XStrInlineSize then
+ if FLen<InlineSz then
    begin
      System.SetLength(Result,FLen);
      Move(FChars[1],Result[1],Flen)
    end
-    else Result:=RawByteString(FNative);
+    else Result:=String(FNative);
 end;
 
 // XInstance functions
@@ -208,15 +218,17 @@ end;
 
 class function XInstance.New(AType: XType; AParent: PXInstance): PXInstance;
 begin
- if AParent<>nil then Result:=AParent^.AllocItem // we expand the parent or
+ if AParent<>nil then Result:=AParent^.AddItem // we expand the parent or
                  else Result:=GetMem(XInstance.Size); // we alloc mem for a root instance
-  Result^.Initialize(AType,AParent);
+
+
+ Result^.Init(AType,AParent);
 end;
 
 procedure XInstance.Free;
 begin
  Finalize;
- if isRoot then FreeMem(@Self);  // free mem only if this is a root
+ if isRoot then FreeMem(@Self);  // free mem only if this is a root instance
 end;
 
 procedure XInstance.InitContainer(InitialSize: Cardinal);
@@ -224,13 +236,13 @@ begin
   if FContainer=nil then FContainer:=XContainer.New(InitialSize);
 end;
 
-function XInstance.AllocItem: PXInstance;
+function XInstance.AddItem: PXInstance;
 begin
   if FContainer=nil then FContainer:=XContainer.New(XContainer.PageSize);
   Result:=FContainer^.Expand;
 end;
 
-procedure XInstance.Initialize(AType: XType; AParent: PXInstance=nil);
+procedure XInstance.Init(AType: XType; AParent: PXInstance=nil);
 begin
  FHeader.FType:=ord(AType);
  if AParent=nil then FHeader.FAttr:=FlagRoot
@@ -260,27 +272,32 @@ end;
 
 function XInstance.isRoot:boolean;inline;
 begin
-  Result:=FHeader.FAttr and FlagRoot <>0;
+  Result:=ByteBool(FHeader.FAttr and FlagRoot);
 end;
 
 function XInstance.Deleted:boolean;inline;
 begin
-  Result:=FHeader.FAttr and FlagDeleted <> 0;
+  Result:=ByteBool(FHeader.FAttr and FlagDeleted);
 end;
 
 function XInstance.Modified:boolean;inline;
 begin
-  Result:=FHeader.FAttr and FlagModified <> 0;
+  Result:=ByteBool(FHeader.FAttr and FlagModified);
 end;
 
 function XInstance.Count:Cardinal;
 begin
- if (InstanceType in [xtObject,xtArray]) and (FContainer<>nil) then
+ if FContainer<>nil then
   begin
    Result:=FContainer^.FCount;
    if InstanceType=xtObject then Result:=Result div 2;
   end
    else Result:=0;
+end;
+
+function XInstance.StrType:cardinal;inline;
+begin
+ Result:=FHeader.FAttr and FlagNativeStr;
 end;
 
 initialization
