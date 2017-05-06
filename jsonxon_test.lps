@@ -4,14 +4,13 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="28">
+    <Units Count="31">
       <Unit0>
         <Filename Value="jsonxon_test.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
-        <CursorPos Y="4"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="103" Y="3"/>
         <UsageCount Value="203"/>
-        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="test_main.pas"/>
@@ -19,57 +18,48 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="161"/>
         <CursorPos X="28" Y="175"/>
         <UsageCount Value="203"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="xon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="222"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="261"/>
         <CursorPos X="17" Y="240"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="xonjson.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="412"/>
-        <CursorPos X="33" Y="427"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="35" Y="434"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="xins.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="8"/>
-        <CursorPos X="73" Y="239"/>
-        <UsageCount Value="91"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="134"/>
+        <CursorPos X="38" Y="152"/>
+        <UsageCount Value="92"/>
       </Unit4>
       <Unit5>
         <Filename Value="xtypes.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="11"/>
-        <CursorPos X="40" Y="12"/>
-        <UsageCount Value="91"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="32" Y="20"/>
+        <UsageCount Value="92"/>
       </Unit5>
       <Unit6>
         <Filename Value="xonbinary.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="174"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="193"/>
         <CursorPos X="35" Y="192"/>
-        <UsageCount Value="43"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="44"/>
       </Unit6>
       <Unit7>
         <Filename Value="xstr.pas"/>
@@ -208,128 +198,29 @@
         <TopLine Value="385"/>
         <UsageCount Value="10"/>
       </Unit27>
+      <Unit28>
+        <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\fcl-web\src\base\fphttp.pp"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="678"/>
+        <UsageCount Value="10"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\fcl-web\src\base\httpdefs.pp"/>
+        <UnitName Value="HTTPDefs"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="12"/>
+        <UsageCount Value="10"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\fcl-web\src\base\httpprotocol.pp"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit30>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
-      <Position1>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="80" Column="21" TopLine="64"/>
-      </Position1>
-      <Position2>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="81" Column="14" TopLine="73"/>
-      </Position2>
-      <Position3>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="86" Column="20" TopLine="67"/>
-      </Position3>
-      <Position4>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="146" Column="19" TopLine="128"/>
-      </Position4>
-      <Position5>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="80" Column="20" TopLine="70"/>
-      </Position5>
-      <Position6>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="154" Column="21" TopLine="124"/>
-      </Position6>
-      <Position7>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="161" Column="58" TopLine="131"/>
-      </Position7>
-      <Position8>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="80" Column="20" TopLine="61"/>
-      </Position8>
-      <Position9>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="154" Column="21" TopLine="124"/>
-      </Position9>
-      <Position10>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="16" Column="53"/>
-      </Position10>
-      <Position11>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="23" Column="48" TopLine="4"/>
-      </Position11>
-      <Position12>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="336" Column="10" TopLine="317"/>
-      </Position12>
-      <Position13>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="289" Column="9" TopLine="271"/>
-      </Position13>
-      <Position14>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="293" Column="16" TopLine="275"/>
-      </Position14>
-      <Position15>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="295" Column="20" TopLine="275"/>
-      </Position15>
-      <Position16>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="296" Column="33" TopLine="278"/>
-      </Position16>
-      <Position17>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="300" Column="32" TopLine="282"/>
-      </Position17>
-      <Position18>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="299" Column="36" TopLine="281"/>
-      </Position18>
-      <Position19>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="301" Column="34" TopLine="281"/>
-      </Position19>
-      <Position20>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="306" Column="9" TopLine="288"/>
-      </Position20>
-      <Position21>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="308" Column="38" TopLine="291"/>
-      </Position21>
-      <Position22>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="311" Column="38" TopLine="293"/>
-      </Position22>
-      <Position23>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="317" Column="14" TopLine="299"/>
-      </Position23>
-      <Position24>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="337" Column="21" TopLine="319"/>
-      </Position24>
-      <Position25>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="339" Column="14" TopLine="321"/>
-      </Position25>
-      <Position26>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="347" Column="41" TopLine="328"/>
-      </Position26>
-      <Position27>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="350" Column="31" TopLine="332"/>
-      </Position27>
-      <Position28>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="143" Column="28" TopLine="136"/>
-      </Position28>
-      <Position29>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="407" Column="48" TopLine="397"/>
-      </Position29>
-      <Position30>
-        <Filename Value="xonjson.pas"/>
-        <Caret Line="417" Column="55" TopLine="390"/>
-      </Position30>
-    </JumpHistory>
+    <General>
+      <ActiveWindowIndexAtStart Value="-1"/>
+    </General>
+    <JumpHistory HistoryIndex="-1"/>
   </ProjectSession>
 </CONFIG>

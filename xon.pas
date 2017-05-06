@@ -41,10 +41,10 @@ XVar =  record
            class function InstanceSize: Cardinal;static;
 
            class function New(AType: XType):XVar;static; //Create New ROOT Variable
-           class function New(AType: XType; AParent: XVar): XVar;static; // Create New Variable
+           class function New(AType: XType; AParent: XVar): XVar;static; // Create New Variable as child of an existing xon
            function Add(AType: XType): XVar; // Add new child in Array
            function Add(AType: XType;const AKey:String=''): XVar; // Add new child in Object
-           procedure Free;
+           procedure Free;  //
 
            function Assigned:boolean;
 

@@ -33,6 +33,7 @@ type
                      case integer of
                         0: ( FChars: array[01..InlineSz] of char); //  inline characters
                         1: ( FNative: Pointer); // fpc string
+                        2: ( FCharBuf: PChar); // ptr to user managed buffer or chars
               end;
 
              XContainer= packed record
@@ -83,6 +84,8 @@ type
 
 implementation
 
+uses PtrVectors;
+
  const
                    FlagRoot =  %10000000;
                     FlagKey =  %01000000;
@@ -97,6 +100,11 @@ implementation
 
 
 var  DivMagic:Cardinal;
+
+
+threadvar
+
+   FreeContainersList: PtrVector;
 
 
 // XContainer
@@ -302,5 +310,17 @@ end;
 
 initialization
  DivMagic := BsrDWord(XContainer.PageSize);
+
+ {
+   we initialize free lists for the main thread.
+   but this must be done in every thred if Pool Model is changed to xpPerThread!!!
+ }
+
+ FreeContainersList.Initialize;
+
+ finalization
+
+ FreeContainersList.Finalize;
+
 end.
 

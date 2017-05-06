@@ -21,10 +21,19 @@ type
  );
 
  // Number types
- XFloat = Single;
+ XFloat = Double;
  XInt = Integer;
 
- function XTypeName( AType: XType): String;
+ XPoolModel = (
+               xpNone, // No Pool - default behaviour  getmem / freemem
+               xpShareLock, // One pool for all threads
+               xpPerThread // One pool per thread
+              );
+
+
+function XTypeName( AType: XType): String;
+
+ var XONPoolModel: XPoolModel = xpNone;
 
 implementation
 
@@ -38,6 +47,7 @@ begin
                xtString: Result:='String';
                xtObject: Result:='Object';
                xtArray: Result:='Array';
+               xtInt64: Result:= 'Int64';
                xtBinary: Result:='Binary';
                xtDateTime: Result:='DateTime';
 
