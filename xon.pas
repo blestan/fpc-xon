@@ -43,7 +43,7 @@ XVar =  record
            class function New(AType: XType):XVar;static; //Create New ROOT Variable
            class function New(AType: XType; AParent: XVar): XVar;static; // Create New Variable as child of an existing xon
            function Add(AType: XType): XVar; // Add new child in Array
-           function Add(AType: XType;const AKey:String=''): XVar; // Add new child in Object
+           function Add(AType: XType;const AKey:String): XVar; // Add new child in Object
            procedure Free;  //
 
            function Assigned:boolean;
@@ -124,13 +124,13 @@ end;
 procedure XVar.SetString( AValue: PChar; Size: Cardinal);
 begin
   if Assigned  and (VarType = xtString) then FInstance^.FStr.SetStr(AValue,Size)
-                                         else raise EXONException.Create(XON_Assign_Exception);
+                                         else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtString),XTypeName(VarType)]);
 end;
 
 procedure XVar.SetString(const AValue: String);
 begin
   if VarType = xtString then FInstance^.FStr.SetStr(AValue)
-                         else raise EXONException.Create(XON_Assign_Exception);
+                         else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtString),XTypeName(VarType)]);
 end;
 
 function XVar.GetBoolean:Boolean;
@@ -284,7 +284,7 @@ begin
                       else raise EXONException.Create(XON_Expand_Exception);
 end;
 
-function XVar.Add(AType: XType;const AKey:String=''): XVar;
+function XVar.Add(AType: XType;const AKey:String): XVar;
 begin
   if VarType=xtObject then
     begin
