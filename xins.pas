@@ -1,5 +1,6 @@
 {
-  XON Instance - Internal XON Sructures
+  XON Instance - Internal Memory XON Sructures
+  modify with extreme care!!!
 }
 unit xins;
 
@@ -17,14 +18,15 @@ type
              // XON Instance Header
              XHeader=packed record
                     FType,      //  var type
-                    FAttr: byte  // extra flags
+                    FAttr: Byte;  // extra flags
+                    FVMTIndex: Word // reserved for future use;
              end;
 
              XStr = packed record
                     const
-                        InlineSz=9; // do not modify ... binary persistance comptibility will be broken!
+                        InlineSz=12; // do not modify ... binary persistance comptibility will be broken!
                     private
-                        FLen: Byte;
+                        FLen: Integer;
                     public
                         Procedure SetStr(const S: String);overload;
                         Procedure SetStr (P: PChar; Len: Integer);overload;
@@ -33,7 +35,7 @@ type
                      case integer of
                         0: ( FChars: array[01..InlineSz] of char); //  inline characters
                         1: ( FNative: Pointer); // fpc string
-                        2: ( FCharBuf: PChar); // ptr to user managed buffer or chars
+                        2: ( FCharBuf: PChar); // ptr to user managed buffer or chars  - to do!!!
               end;
 
              XContainer= packed record
@@ -43,6 +45,7 @@ type
                              PagesDelta = 8;
                              ModMagic = PageSize-1;
                         private
+                         FNextFree: PXContainer;
                          FInternalSize: Cardinal;
                          FCount: Cardinal;        // nominal count of items
                          FPagesCount: Cardinal;   // number of pages allocated
@@ -56,11 +59,11 @@ type
 
              end;
 
-             XInstance = packed record
+             XInstance =   packed record
  	         FHeader: XHeader;
                  function InstanceType: XType;
                  class function Size:Cardinal;static; // instance size
-                 class function New( AType: XType; AParent: PXInstance): PXInstance;static;
+                 class function Alloc( AType: XType; AParent: PXInstance): PXInstance;static;
                  procedure Free;
                  function Deleted:boolean;
                  function Modified: boolean;
@@ -70,15 +73,15 @@ type
                  function AddItem: PXInstance;
                  function Count: Cardinal;
                  procedure InitContainer(InitialSize:Cardinal);
-                 function StrType: Cardinal;
-                 case  Integer of
+                 case  Xtype of
                    xtInteger: (FInt: XInt);
                      xtFloat: (FFloat: XFloat);
                    xtBoolean: (FBool: Boolean);
                     xtString: (FStr: XStr);
                      xtArray,
                     xtObject: (FContainer: PXContainer;
-                               FParent: PXInstance;)
+                               FParent: PXInstance;);
+                      xtGUID: (FGUID: TGuid)
             end;
 
 
@@ -88,15 +91,8 @@ uses PtrVectors;
 
  const
                    FlagRoot =  %10000000;
-                    FlagKey =  %01000000;
-                FlagDeleted =  %00100000;
-               FlagModified =  %00010000;
-
-
-               FlagInlineStr =  %00000001;
-                 FlagBuffStr =  %00000010;
-               FlagNativeStr =  %00000011;
-
+                FlagDeleted =  %01000000;
+               FlagModified =  %00100000;
 
 
 var  DivMagic:Cardinal;
@@ -178,7 +174,7 @@ begin
   else
    begin
      FNative:=nil;
-     FLen:=255; // indicates native string
+     FLen:=High(FLen); // indicates native string
      System.SetLength(RawByteString(FNative),Len);
      Move(P^,RawByteString(FNative)[1],Len);
    end
@@ -197,7 +193,7 @@ begin
   else
    begin
      FNative:=nil;
-     FLen:=255; // indicates native string
+     FLen:=High(FLen); // indicates native string
      String(FNative):=S;
    end
 end;
@@ -224,7 +220,7 @@ begin
   Result:=Sizeof(XInstance);
 end;
 
-class function XInstance.New(AType: XType; AParent: PXInstance): PXInstance;
+class function XInstance.Alloc(AType: XType; AParent: PXInstance): PXInstance;
 begin
  if AParent<>nil then Result:=AParent^.AddItem // we expand the parent or
                  else Result:=GetMem(XInstance.Size); // we alloc mem for a root instance
@@ -303,10 +299,6 @@ begin
    else Result:=0;
 end;
 
-function XInstance.StrType:cardinal;inline;
-begin
- Result:=FHeader.FAttr and FlagNativeStr;
-end;
 
 initialization
  DivMagic := BsrDWord(XContainer.PageSize);

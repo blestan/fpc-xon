@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Active="Default"/>
+    <BuildModes Active="Release"/>
     <Units Count="31">
       <Unit0>
         <Filename Value="jsonxon_test.pas"/>
@@ -18,48 +18,53 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="161"/>
-        <CursorPos X="28" Y="175"/>
+        <CursorPos X="77" Y="102"/>
         <UsageCount Value="203"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="xon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="261"/>
-        <CursorPos X="17" Y="240"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="223"/>
+        <CursorPos X="59" Y="10"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="xonjson.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="35" Y="434"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="121"/>
+        <CursorPos X="57" Y="72"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="xins.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="134"/>
-        <CursorPos X="38" Y="152"/>
-        <UsageCount Value="92"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="34"/>
+        <CursorPos X="30" Y="3"/>
+        <UsageCount Value="97"/>
+        <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="xtypes.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="32" Y="20"/>
-        <UsageCount Value="92"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="37" Y="13"/>
+        <UsageCount Value="97"/>
+        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="xonbinary.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="193"/>
-        <CursorPos X="35" Y="192"/>
-        <UsageCount Value="44"/>
+        <EditorIndex Value="5"/>
+        <UsageCount Value="49"/>
+        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="xstr.pas"/>
@@ -193,15 +198,15 @@
         <UsageCount Value="10"/>
       </Unit26>
       <Unit27>
-        <Filename Value="C:\Users\BLESTA~1\AppData\Local\Temp\7zOC6EF5028\qmsgpack.pas"/>
+        <Filename Value="E:\BLESTA~1\AppData\Local\Temp\7zOC6EF5028\qmsgpack.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="385"/>
         <UsageCount Value="10"/>
       </Unit27>
       <Unit28>
         <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\fcl-web\src\base\fphttp.pp"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
         <TopLine Value="678"/>
         <UsageCount Value="10"/>
       </Unit28>
@@ -218,9 +223,127 @@
         <UsageCount Value="10"/>
       </Unit30>
     </Units>
-    <General>
-      <ActiveWindowIndexAtStart Value="-1"/>
-    </General>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="xins.pas"/>
+        <Caret Line="27" Column="29" TopLine="4"/>
+      </Position1>
+      <Position2>
+        <Filename Value="xins.pas"/>
+        <Caret Line="165" Column="9" TopLine="126"/>
+      </Position2>
+      <Position3>
+        <Filename Value="xins.pas"/>
+        <Caret Line="168" Column="8" TopLine="129"/>
+      </Position3>
+      <Position4>
+        <Filename Value="xins.pas"/>
+        <Caret Line="169" Column="41" TopLine="130"/>
+      </Position4>
+      <Position5>
+        <Filename Value="xins.pas"/>
+        <Caret Line="174" Column="10" TopLine="135"/>
+      </Position5>
+      <Position6>
+        <Filename Value="xins.pas"/>
+        <Caret Line="183" Column="10" TopLine="144"/>
+      </Position6>
+      <Position7>
+        <Filename Value="xins.pas"/>
+        <Caret Line="187" Column="8" TopLine="148"/>
+      </Position7>
+      <Position8>
+        <Filename Value="xins.pas"/>
+        <Caret Line="188" Column="43" TopLine="149"/>
+      </Position8>
+      <Position9>
+        <Filename Value="xins.pas"/>
+        <Caret Line="5" Column="40"/>
+      </Position9>
+      <Position10>
+        <Filename Value="xins.pas"/>
+        <Caret Line="27" Column="29"/>
+      </Position10>
+      <Position11>
+        <Filename Value="xins.pas"/>
+        <Caret Line="165" Column="9" TopLine="126"/>
+      </Position11>
+      <Position12>
+        <Filename Value="xins.pas"/>
+        <Caret Line="168" Column="8" TopLine="129"/>
+      </Position12>
+      <Position13>
+        <Filename Value="xins.pas"/>
+        <Caret Line="169" Column="41" TopLine="130"/>
+      </Position13>
+      <Position14>
+        <Filename Value="xins.pas"/>
+        <Caret Line="174" Column="14" TopLine="135"/>
+      </Position14>
+      <Position15>
+        <Filename Value="xins.pas"/>
+        <Caret Line="183" Column="10" TopLine="144"/>
+      </Position15>
+      <Position16>
+        <Filename Value="xins.pas"/>
+        <Caret Line="187" Column="8" TopLine="148"/>
+      </Position16>
+      <Position17>
+        <Filename Value="xins.pas"/>
+        <Caret Line="188" Column="43" TopLine="149"/>
+      </Position17>
+      <Position18>
+        <Filename Value="xins.pas"/>
+        <Caret Line="193" Column="10" TopLine="154"/>
+      </Position18>
+      <Position19>
+        <Filename Value="xins.pas"/>
+        <Caret Line="199" Column="9" TopLine="160"/>
+      </Position19>
+      <Position20>
+        <Filename Value="xins.pas"/>
+        <Caret Line="200" Column="9" TopLine="161"/>
+      </Position20>
+      <Position21>
+        <Filename Value="xins.pas"/>
+        <Caret Line="202" Column="34" TopLine="163"/>
+      </Position21>
+      <Position22>
+        <Filename Value="xins.pas"/>
+        <Caret Line="203" Column="35" TopLine="164"/>
+      </Position22>
+      <Position23>
+        <Filename Value="xins.pas"/>
+        <Caret Line="25" Column="36"/>
+      </Position23>
+      <Position24>
+        <Filename Value="xins.pas"/>
+        <Caret Line="27" Column="29"/>
+      </Position24>
+      <Position25>
+        <Filename Value="xins.pas"/>
+        <Caret Line="165" Column="9" TopLine="126"/>
+      </Position25>
+      <Position26>
+        <Filename Value="xins.pas"/>
+        <Caret Line="168" Column="8" TopLine="129"/>
+      </Position26>
+      <Position27>
+        <Filename Value="xins.pas"/>
+        <Caret Line="169" Column="10" TopLine="130"/>
+      </Position27>
+      <Position28>
+        <Filename Value="test_main.pas"/>
+        <Caret Line="102" Column="77"/>
+      </Position28>
+      <Position29>
+        <Filename Value="xins.pas"/>
+        <Caret Line="26" Column="28" TopLine="20"/>
+      </Position29>
+      <Position30>
+        <Filename Value="xins.pas"/>
+        <Caret Line="21" Column="64"/>
+      </Position30>
+    </JumpHistory>
   </ProjectSession>
 </CONFIG>

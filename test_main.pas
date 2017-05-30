@@ -103,7 +103,7 @@ begin
              DumpNode(Parser.XON,nil,'');
              XONTree.EndUpdate;
              T1:=GetTickCount64;
-             LogOutput.Append(Format('Tree Update Time: %d',[t1-t]));
+             LogOutput.Append(Format('Tree Update Time: %d ms',[t1-t]));
            end;
 end;
 
@@ -143,13 +143,13 @@ begin
   T:=GetTickCount64;
   X:=R.ReadXON;
   T1:=GetTickCount64;
-  LogOutput.Append(Format('Reading XON Binary: %d',[t1-t]));
+  LogOutput.Append(Format('Reading XON Binary: %d ms',[t1-t]));
   T:=GetTickCount64;
   XONTree.BeginUpdate;
   DumpNode(X,nil,'');
   XONTree.EndUpdate;
   T1:=GetTickCount64;
-  LogOutput.Append(Format('Tree Update Time: %d',[t1-t]));
+  LogOutput.Append(Format('Tree Update Time: %d ms',[t1-t]));
   R.Free;
   S.Free;
   X.Free;

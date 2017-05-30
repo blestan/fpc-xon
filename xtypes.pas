@@ -6,8 +6,9 @@ interface
 
 type
 
- XType =  ( // basic types - use only the lower 5 bits - max 32 types!!!
+ XType =  ( // basic types
                xtNull= 0,
+               xtToeken, // Interaly this is a unresolved string - can be used for various data models implementations
                xtInteger,
                xtFloat,
                xtBoolean,
@@ -16,8 +17,10 @@ type
                xtArray,
             // extra types
                xtInt64,
+               xtInt128, // reserved for future use
                xtBinary,
-               xtDateTime
+               xtDateTime,
+               xtGUID
  );
 
  // Number types

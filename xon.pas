@@ -90,13 +90,13 @@ end;
 // create a root
 class function XVar.New(AType: XType): XVar;inline;
 begin
-  Result.FInstance:=XInstance.New(AType,nil);
+  Result.FInstance:=XInstance.Alloc(AType,nil);
 end;
 
 // create child
 class function XVar.New(AType: XType; AParent: XVar): XVar;inline;
 begin
- Result.FInstance:=XInstance.New(AType,AParent.FInstance);
+ Result.FInstance:=XInstance.Alloc(AType,AParent.FInstance);
 end;
 
 procedure XVar.Free;
@@ -251,8 +251,7 @@ end;
 function XVar.GetVar(const Index: String): XVar;
 var i: integer;
 begin
- Result:=XVar.Null;
- if VarType<>xtObject then exit;
+ if (VarType<>xtObject) or (FInstance^.FContainer=nil) then exit(XVar.Null);
  for i:=00 to Count-1 do
   if Keys[i].AsString=Index then
     begin
@@ -264,11 +263,9 @@ end;
 
 function XVar.GetVar( Index: Cardinal): XVar;
 begin
- case VarType of
-  xtArray: Result.FInstance:=FInstance^.FContainer^[Index];
-  xtObject: Result.FInstance:=FInstance^.FContainer^[Succ(Index shl 1)];
-  else Result:=XVar.Null
- end
+ if (not (VarType in [xtArray,xtObject])) or (FInstance^.FContainer=nil)  then exit(XVar.Null);
+ if VarType=xtObject then Index:=Succ(Index shl 1);
+ Result.FInstance:=FInstance^.FContainer^[Index];
 end;
 
 
@@ -280,7 +277,7 @@ end;
 
 function XVar.Add(AType: XType): XVar;
 begin
-  if VarType=xtArray then Result.FInstance:=XInstance.New(AType,FInstance)
+  if VarType=xtArray then Result.FInstance:=XInstance.Alloc(AType,FInstance)
                       else raise EXONException.Create(XON_Expand_Exception);
 end;
 
@@ -288,8 +285,8 @@ function XVar.Add(AType: XType;const AKey:String): XVar;
 begin
   if VarType=xtObject then
     begin
-      if AKey<>'' then XInstance.New(xtString,FInstance)^.FStr.SetStr(AKey);
-       Result.FInstance:=XInstance.New(AType,FInstance);
+      XInstance.Alloc(xtString,FInstance)^.FStr.SetStr(AKey);
+      Result.FInstance:=XInstance.Alloc(AType,FInstance);
     end
      else Raise EXONException.Create(XON_Expand_Exception);
 end;
