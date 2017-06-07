@@ -69,7 +69,7 @@ begin
     begin
       case X.VarType of
 
-      xtObject: with X do
+      xtList: with X do
                   begin
                    Prefix:=Keys[C].AsString;
                    DumpNode(Vars[C],Node,Prefix);
@@ -180,7 +180,7 @@ begin
   if assigned(XONTree.Selected) then
     begin
      Sel:=XVar(XONTree.Selected.Data);
-     if sel.VarType=xtObject then
+     if sel.VarType=xtList then
       begin
        S:=InputBox('Find key','Please enter key name','');
        Sel:=Sel[S];

@@ -15,11 +15,32 @@ type
              PXInstance=^XInstance;
              PXContainer=^XContainer;
 
+
+
+             XContainer= packed record
+                       private
+                        const
+                             PageSize = 32; // vars per page - keep this always power of 2 ( i.e 2,4,8,16..1024)  !!!!
+                             PagesDelta = 8;
+                             ModMagic = PageSize-1;
+                        private
+                         FInternalSize: Cardinal;
+                         FCount: Cardinal;        // nominal count of items
+                         FPagesCount: Cardinal;   // number of pages allocated
+                         FPages: PPointer;        // array of pointers to pages memory
+                         function Expand:PXInstance;
+                         function GetInstance(Index: Cardinal): PXInstance;
+                       public
+                        class function New(ASize:Cardinal): PXContainer;static;
+                        procedure Finalize;
+                        property  Items[index: cardinal]: PXInstance read GetInstance;default;
+
+             end;
+
              // XON Instance Header
              XHeader=packed record
-                    FType,      //  var type
-                    FAttr: Byte;  // extra flags
-                    FVMTIndex: Word // reserved for future use;
+                    VType,      //  var type
+                    Attr: Word;  // extra flags
              end;
 
              XStr = packed record
@@ -38,56 +59,42 @@ type
                         2: ( FCharBuf: PChar); // ptr to user managed buffer or chars  - to do!!!
               end;
 
-             XContainer= packed record
-                       private
-                        const
-                             PageSize = 32; // vars per page - keep this always power of 2 ( i.e 2,4,8,16..1024)  !!!!
-                             PagesDelta = 8;
-                             ModMagic = PageSize-1;
-                        private
-                         FNextFree: PXContainer;
-                         FInternalSize: Cardinal;
-                         FCount: Cardinal;        // nominal count of items
-                         FPagesCount: Cardinal;   // number of pages allocated
-                         FPages: PPointer;        // array of pointers to pages memory
-                         function Expand:PXInstance;
-                         function GetInstance(Index: Cardinal): PXInstance;
-                       public
-                        class function New(ASize:Cardinal): PXContainer;static;
-                        procedure Finalize;
-                        property  Items[index: cardinal]: PXInstance read GetInstance;default;
-
+             XVariant= packed record
+                case  Xtype of
+                   xtInteger: (Int: XInt);
+                     xtFloat: (Float: XFloat);
+                   xtBoolean: (Bool: Boolean);
+                    xtToken,
+                    xtString: (Str: XStr);
+                     xtArray,
+                    xtList: (Container: PXContainer;
+                               Parent: PXInstance;);
+                      xtGUID: (GUID: TGuid);
              end;
 
              XInstance =   packed record
- 	         FHeader: XHeader;
-                 function InstanceType: XType;
+ 	         Header: XHeader;
+                   Data: XVariant;
                  class function Size:Cardinal;static; // instance size
+
+                 procedure Init(AType: XType; AParent: PXInstance=nil);
+                 procedure InitContainer(InitialSize:Cardinal);
                  class function Alloc( AType: XType; AParent: PXInstance): PXInstance;static;
+
+                 procedure Finalize;
                  procedure Free;
+
+                 function InstanceType: XType;
                  function Deleted:boolean;
                  function Modified: boolean;
                  function isRoot:boolean;inline;
-                 procedure Init(AType: XType; AParent: PXInstance=nil);
-                 procedure Finalize;
                  function AddItem: PXInstance;
                  function Count: Cardinal;
-                 procedure InitContainer(InitialSize:Cardinal);
-                 case  Xtype of
-                   xtInteger: (FInt: XInt);
-                     xtFloat: (FFloat: XFloat);
-                   xtBoolean: (FBool: Boolean);
-                    xtString: (FStr: XStr);
-                     xtArray,
-                    xtObject: (FContainer: PXContainer;
-                               FParent: PXInstance;);
-                      xtGUID: (FGUID: TGuid)
             end;
 
 
 implementation
 
-uses PtrVectors;
 
  const
                    FlagRoot =  %10000000;
@@ -96,12 +103,6 @@ uses PtrVectors;
 
 
 var  DivMagic:Cardinal;
-
-
-threadvar
-
-   FreeContainersList: PtrVector;
-
 
 // XContainer
 class function XContainer.New(ASize: Cardinal): PXContainer;
@@ -151,7 +152,7 @@ end;
 function XContainer.Expand:PXInstance;
 begin
    Inc(FCount);
-   if FCount-FInternalSize>=FPagesCount*PageSize then
+   if FCount-FInternalSize >= Qword(FPagesCount)*qword(PageSize) then
     begin
      if FPagesCount mod PagesDelta = 0 then
        FPages:=ReallocMem(FPages,(FPagesCount+PagesDelta)*SizeOf(PXInstance));
@@ -212,7 +213,7 @@ end;
 
 function XInstance.InstanceType: XType;inline;
 begin
- Result:=XType(FHeader.FType)
+ Result:=XType(Header.VType)
 end;
 
 class function XInstance.Size: Cardinal;static;inline;
@@ -237,38 +238,38 @@ end;
 
 procedure XInstance.InitContainer(InitialSize: Cardinal);
 begin
-  if FContainer=nil then FContainer:=XContainer.New(InitialSize);
+  if Data.Container=nil then Data.Container:=XContainer.New(InitialSize);
 end;
 
 function XInstance.AddItem: PXInstance;
 begin
-  if FContainer=nil then FContainer:=XContainer.New(XContainer.PageSize);
-  Result:=FContainer^.Expand;
+  if Data.Container=nil then Data.Container:=XContainer.New(XContainer.PageSize);
+  Result:=Data.Container^.Expand;
 end;
 
 procedure XInstance.Init(AType: XType; AParent: PXInstance=nil);
 begin
- FHeader.FType:=ord(AType);
- if AParent=nil then FHeader.FAttr:=FlagRoot
-                else FHeader.FAttr:=0;
- case XType(FHeader.FType) of
-     xtString: FStr.FLen:=00;
-     xtObject,xtArray: begin
-                        FParent:=AParent;
-                        FContainer:=nil;
+ Header.VType:=ord(AType);
+ if AParent=nil then Header.Attr:=FlagRoot
+                else Header.Attr:=0;
+ case InstanceType of
+     xtString: Data.Str.FLen:=00;
+     xtArray,xtList: begin
+                        Data.Parent:=AParent;
+                        Data.Container:=nil;
                        end;
  end
 end;
 
 procedure XInstance.Finalize;
 begin
- case XType(FHeader.FType) of
-     xtString: FStr.SetStr('');
-     xtObject,xtArray: if FContainer<>nil then
+ case InstanceType of
+     xtString: Data.Str.SetStr('');
+     xtArray,xtList: if Data.Container<>nil then
                          begin
-                          FContainer^.Finalize;
-                          Freemem(FContainer);
-                          FContainer:=nil;
+                          Data.Container^.Finalize;
+                          Freemem(Data.Container);
+                          Data.Container:=nil;
                          end;
  end;
 end;
@@ -276,25 +277,25 @@ end;
 
 function XInstance.isRoot:boolean;inline;
 begin
-  Result:=ByteBool(FHeader.FAttr and FlagRoot);
+  Result:=WordBool(Header.Attr and FlagRoot);
 end;
 
 function XInstance.Deleted:boolean;inline;
 begin
-  Result:=ByteBool(FHeader.FAttr and FlagDeleted);
+  Result:=WordBool(Header.Attr and FlagDeleted);
 end;
 
 function XInstance.Modified:boolean;inline;
 begin
-  Result:=ByteBool(FHeader.FAttr and FlagModified);
+  Result:=WordBool(Header.Attr and FlagModified);
 end;
 
 function XInstance.Count:Cardinal;
 begin
- if FContainer<>nil then
+ if Data.Container<>nil then
   begin
-   Result:=FContainer^.FCount;
-   if InstanceType=xtObject then Result:=Result div 2;
+   Result:=Data.Container^.FCount;
+   if InstanceType=xtList then Result:=Result div 2;
   end
    else Result:=0;
 end;
@@ -302,17 +303,6 @@ end;
 
 initialization
  DivMagic := BsrDWord(XContainer.PageSize);
-
- {
-   we initialize free lists for the main thread.
-   but this must be done in every thred if Pool Model is changed to xpPerThread!!!
- }
-
- FreeContainersList.Initialize;
-
- finalization
-
- FreeContainersList.Finalize;
 
 end.
 

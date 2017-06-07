@@ -166,8 +166,8 @@ begin
      ',': if not (FSuper.isContainer) then exit(JSON_ERROR_INVAL)
                                       else inc(FPos);
 
-     ':': if (FSuper.VarType<>xtObject) then exit(JSON_ERROR_INVAL)
-                                        else inc(FPos);
+     ':': if (FSuper.VarType<>xtList) then exit(JSON_ERROR_INVAL)
+                                      else inc(FPos);
 
 
      '[': begin
@@ -180,7 +180,7 @@ begin
 
 
      '{': begin
-            FXON:=XVar.New(xtObject,FSuper);
+            FXON:=XVar.New(xtList,FSuper);
             FSuper:=FXON;
             inc(Fpos);
             inc(Result);

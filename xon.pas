@@ -21,7 +21,6 @@ XVar =  record
          private
            FInstance: PXInstance;
            function GetString:String;
-           procedure SetString(const AValue: String);overload;
            function GetBoolean: Boolean;
            procedure SetBoolean(AValue:Boolean);
            function GetInteger: XInt;
@@ -42,9 +41,12 @@ XVar =  record
 
            class function New(AType: XType):XVar;static; //Create New ROOT Variable
            class function New(AType: XType; AParent: XVar): XVar;static; // Create New Variable as child of an existing xon
+
            function Add(AType: XType): XVar; // Add new child in Array
-           function Add(AType: XType;const AKey:String): XVar; // Add new child in Object
-           procedure Free;  //
+
+           function Add(AType: XType;const AKey:String): XVar; // Add new child with string key in List
+
+           procedure Free;
 
            function Assigned:boolean;
 
@@ -52,10 +54,13 @@ XVar =  record
            function Parent: XVar;
 
            procedure SetString(AValue: PChar; Size: Cardinal);overload;
+           procedure SetString(const AValue: String);overload;
+
            property AsInteger: XInt read GetInteger write SetInteger;
+           property AsFloat: XFloat read GetFloat write SetFloat;
            property AsBoolean: Boolean read GetBoolean write SetBoolean;
            property AsString: String read GetString write SetString;
-           property AsFloat: XFloat read GetFloat write SetFloat;
+
            property Vars[index: cardinal]: XVar read GetVar;default;
            property Keys[Index: Cardinal]: XVar read GetKey;
 
@@ -113,24 +118,26 @@ begin
   Result:='';
    case VarType of
     xtNull: Result:='Null';
-    xtInteger: Str(FInstance^.FInt,Result);
-    xtFloat: Str(FInstance^.FFloat:10:3,Result);
-    xtString: Result:=FInstance^.FStr.GetStr;
-    xtBoolean: if FInstance^.FBool then Result:='True'
-                                   else Result:='False';
+    xtInteger: Str(FInstance^.Data.Int,Result);
+    xtFloat: Str(FInstance^.Data.Float:10:3,Result);
+    xtToken,
+    xtString: Result:=FInstance^.Data.Str.GetStr;
+    xtBoolean: if FInstance^.Data.Bool then Result:='True'
+                                       else Result:='False';
+    xtGUID: Result:=GUIDToString(FInstance^.Data.GUID);
    end;
 end;
 
 procedure XVar.SetString( AValue: PChar; Size: Cardinal);
 begin
-  if Assigned  and (VarType = xtString) then FInstance^.FStr.SetStr(AValue,Size)
-                                         else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtString),XTypeName(VarType)]);
+  if VarType in[xtToken, xtString] then FInstance^.Data.Str.SetStr(AValue,Size)
+     else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtString),XTypeName(VarType)]);
 end;
 
 procedure XVar.SetString(const AValue: String);
 begin
-  if VarType = xtString then FInstance^.FStr.SetStr(AValue)
-                         else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtString),XTypeName(VarType)]);
+  if VarType in [xtToken,xtString] then FInstance^.Data.Str.SetStr(AValue)
+     else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtString),XTypeName(VarType)]);
 end;
 
 function XVar.GetBoolean:Boolean;
@@ -138,15 +145,15 @@ begin
   Result:=False;
   case VarType of
       xtNull: Result:=False;
-   xtBoolean: Result:= FInstance^.FBool;
-   xtInteger: Result:= FInstance^.FInt<>0;
-     xtFloat: Result:= FInstance^.FFloat<>0;
+   xtBoolean: Result:= FInstance^.Data.Bool;
+   xtInteger: Result:= FInstance^.Data.Int<>0;
+     xtFloat: Result:= FInstance^.Data.Float<>0;
   end;
 end;
 
 procedure XVar.SetBoolean(AValue: Boolean);
 begin
-  if VarType = xtBoolean then FInstance^.FBool:=AValue
+  if VarType = xtBoolean then FInstance^.Data.Bool:=AValue
                           else raise EXONException.Create(XON_Assign_Exception);
 
 end;
@@ -156,19 +163,19 @@ begin
   Result:=0;
   case VarType of
       xtNull: Result:=0;
-      xtInteger: Result:= FInstance^.FInt;
-   xtBoolean: Result:= Ord(FInstance^.FBool);
-     xtFloat: Result:= Round(FInstance^.FFloat);
+      xtInteger: Result:= FInstance^.Data.Int;
+   xtBoolean: Result:= Ord(FInstance^.Data.Bool);
+     xtFloat: Result:= Round(FInstance^.Data.Float);
   end;
 end;
 
 procedure XVar.SetInteger(AValue: Integer);
 begin
   case VarType of
-       xtInteger: FInstance^.FInt:=AValue;
-         xtFloat: FInstance^.FFloat:=AValue;
-       xtBoolean: FInstance^.FBool:=AValue<>0;
-        xtString: FInstance^.FStr.SetStr(IntToStr(AValue));
+       xtInteger: FInstance^.Data.Int:=AValue;
+         xtFloat: FInstance^.Data.Float:=AValue;
+       xtBoolean: FInstance^.Data.Bool:=AValue<>0;
+        xtString: FInstance^.Data.Str.SetStr(IntToStr(AValue));
         else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtInteger),XTypeName(VarType)]);
   end
 end;
@@ -178,19 +185,19 @@ begin
   Result:=0;
   case VarType of
       xtNull: Result:=0;
-      xtInteger: Result:= FInstance^.FInt;
-   xtBoolean: Result:= Ord(FInstance^.FBool);
-     xtFloat: Result:= FInstance^.FFloat;
+      xtInteger: Result:= FInstance^.Data.Int;
+   xtBoolean: Result:= Ord(FInstance^.Data.Bool);
+     xtFloat: Result:= FInstance^.Data.Float;
   end;
 end;
 
 procedure XVar.SetFloat(AValue: XFloat);
 begin
   case VarType of
-       xtInteger: FInstance^.FInt:=round(AValue);
-         xtFloat: FInstance^.FFloat:=AValue;
-       xtBoolean: FInstance^.FBool:=AValue<>0;
-        xtString: FInstance^.FStr.SetStr(FloatToStr(AValue));
+       xtInteger: FInstance^.Data.Int:=round(AValue);
+         xtFloat: FInstance^.Data.Float:=AValue;
+       xtBoolean: FInstance^.Data.Bool:=AValue<>0;
+        xtString: FInstance^.Data.Str.SetStr(FloatToStr(AValue));
         else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtFloat),XTypeName(VarType)]);
   end
 end;
@@ -213,7 +220,7 @@ end;
 
 function XVar.isContainer:boolean;inline;
 begin
-  Result:=(VarType=xtObject) or (VarType=xtArray);
+  Result:=(VarType=xtArray) or (VarType=xtList);
 end;
 
 function XVar.IsNull:Boolean;inline;
@@ -242,16 +249,17 @@ end;
 
 function XVar.Parent: XVar;inline;
 begin
- if isContainer then Result.FInstance:=FInstance^.FParent
+ if isContainer then Result.FInstance:=FInstance^.Data.Parent
                 else Result:=null;
 end;
 
 
-// linear search in object
+// linear search in list
 function XVar.GetVar(const Index: String): XVar;
 var i: integer;
 begin
- if (VarType<>xtObject) or (FInstance^.FContainer=nil) then exit(XVar.Null);
+ Result:=XVar.Null;
+ if (VarType<>xtList) or (FInstance^.Data.Container=nil) then exit;
  for i:=00 to Count-1 do
   if Keys[i].AsString=Index then
     begin
@@ -263,16 +271,17 @@ end;
 
 function XVar.GetVar( Index: Cardinal): XVar;
 begin
- if (not (VarType in [xtArray,xtObject])) or (FInstance^.FContainer=nil)  then exit(XVar.Null);
- if VarType=xtObject then Index:=Succ(Index shl 1);
- Result.FInstance:=FInstance^.FContainer^[Index];
+ if (not isContainer) or (FInstance^.Data.Container=nil)  then exit(XVar.Null);
+ if VarType=xtList then Index:=Succ(Index shl 1);
+ Result.FInstance:=FInstance^.Data.Container^[Index];
 end;
 
 
 function XVar.GetKey(Index: Cardinal): XVar;
 begin
- if VarType=xtObject then Result.FInstance:=FInstance^.FContainer^[Index shl 1]
-                      else Result:=XVar.Null;
+ if (VarType=xtList) and (FInstance^.Data.Container<>nil)
+   then Result.FInstance:=FInstance^.Data.Container^[Index shl 1]
+   else Result:=XVar.Null;
 end;
 
 function XVar.Add(AType: XType): XVar;
@@ -283,9 +292,9 @@ end;
 
 function XVar.Add(AType: XType;const AKey:String): XVar;
 begin
-  if VarType=xtObject then
+  if VarType=xtList then
     begin
-      XInstance.Alloc(xtString,FInstance)^.FStr.SetStr(AKey);
+      XInstance.Alloc(xtString,FInstance)^.Data.Str.SetStr(AKey);
       Result.FInstance:=XInstance.Alloc(AType,FInstance);
     end
      else Raise EXONException.Create(XON_Expand_Exception);

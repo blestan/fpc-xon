@@ -113,7 +113,7 @@ begin
                  WriteHeader(AVAr.VarType,Length(S));
                  Write(S[1],Length(S));
             end;
-               xtObject: with AVar do
+               xtList: with AVar do
                          begin
                           WriteHeader(AVar.VarType,Count);
                           if count>0 then
@@ -179,8 +179,8 @@ begin
                     FSuper:=Result.Parent;
                    end;
                 end;
-       xtObject: begin
-                 Result:=XVar.New(xtObject,FSuper);
+       xtList: begin
+                 Result:=XVar.New(xtList,FSuper);
                  if I>0 then
                    begin
                     FSuper:=Result;
