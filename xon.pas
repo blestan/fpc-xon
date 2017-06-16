@@ -16,6 +16,11 @@ uses xtypes,xins;
 
 type
 
+
+ IXSerializer=Interface;
+ IXDeserializer=Interface;
+
+
 // Opaque type to deal with XON internal structures
 XVar =  record
          private
@@ -46,6 +51,10 @@ XVar =  record
 
            function Add(AType: XType;const AKey:String): XVar; // Add new child with string key in List
 
+
+           function Serialize( ASerializer: IXSerializer ): boolean;
+           class function NewFrom( ADeserializer: IXDeserializer; AParent: XVar): XVar; static;
+
            procedure Free;
 
            function Assigned:boolean;
@@ -70,6 +79,16 @@ XVar =  record
            function IsNumeric: Boolean;
            function IsNull: Boolean;
          end;
+
+IXSerializer=Interface
+
+             function WriteXON(const X: XVar):boolean; // true if write successful
+ end;
+
+ IXDeserializer=Interface
+
+             function ReadXON(const AParent: XVar):XVar; // true if write successful
+ end;
 
 resourcestring
 
@@ -113,11 +132,36 @@ begin
    end
 end;
 
+function XVar.Add(AType: XType): XVar;
+begin
+  if VarType=xtArray then Result.FInstance:=XInstance.Alloc(AType,FInstance)
+                      else raise EXONException.Create(XON_Expand_Exception);
+end;
+
+function XVar.Add(AType: XType;const AKey:String): XVar;
+begin
+  if VarType=xtList then
+    begin
+      XInstance.Alloc(xtString,FInstance)^.Data.Str.SetStr(AKey);
+      Result.FInstance:=XInstance.Alloc(AType,FInstance);
+    end
+     else Raise EXONException.Create(XON_Expand_Exception);
+end;
+
+function XVar.Serialize(ASerializer: IXSerializer): boolean;inline;
+begin
+  Result:=ASerializer.WriteXON(self);
+end;
+
+class function XVar.NewFrom( ADeserializer: IXDeserializer; AParent: XVar): XVar;inline;
+begin
+  Result:=ADeserializer.ReadXON(AParent);
+end;
+
 function XVar.GetString: String;
 begin
   Result:='';
    case VarType of
-    xtNull: Result:='Null';
     xtInteger: Str(FInstance^.Data.Int,Result);
     xtFloat: Str(FInstance^.Data.Float:10:3,Result);
     xtToken,
@@ -284,21 +328,7 @@ begin
    else Result:=XVar.Null;
 end;
 
-function XVar.Add(AType: XType): XVar;
-begin
-  if VarType=xtArray then Result.FInstance:=XInstance.Alloc(AType,FInstance)
-                      else raise EXONException.Create(XON_Expand_Exception);
-end;
 
-function XVar.Add(AType: XType;const AKey:String): XVar;
-begin
-  if VarType=xtList then
-    begin
-      XInstance.Alloc(xtString,FInstance)^.Data.Str.SetStr(AKey);
-      Result.FInstance:=XInstance.Alloc(AType,FInstance);
-    end
-     else Raise EXONException.Create(XON_Expand_Exception);
-end;
 
 end.
 
