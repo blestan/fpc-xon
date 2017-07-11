@@ -20,7 +20,8 @@ type
                xtInt128, // reserved for future use
                xtBinary,
                xtDateTime,
-               xtGUID
+               xtGUID,
+               xtNativeObject //  Native Object Pascal Instance
  );
 
  // Number types
@@ -48,6 +49,7 @@ begin
                xtBinary: Result:='Binary';
                xtDateTime: Result:='DateTime';
                xtGUID: Result:='GUID';
+               xtNativeObject: Result:='Native Object';
 
   end
 end;

@@ -67,9 +67,10 @@ type
                     xtToken,
                     xtString: (Str: XStr);
                      xtArray,
-                    xtList: (Container: PXContainer;
+                      xtList: (Container: PXContainer;
                                Parent: PXInstance;);
                       xtGUID: (GUID: TGuid);
+                      xtNativeObject: (Obj: TObject);
              end;
 
              XInstance =   packed record
@@ -271,6 +272,7 @@ begin
                           Freemem(Data.Container);
                           Data.Container:=nil;
                          end;
+     xtNativeObject: Data.Obj.Free;
  end;
 end;
 

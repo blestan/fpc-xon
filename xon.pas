@@ -32,6 +32,8 @@ XVar =  record
            procedure SetInteger(AValue: XInt);
            function GetFloat: XFloat;
            procedure SetFloat(AValue: XFloat);
+           function GetObj: TObject;
+           procedure SetObj(AValue: TObject);
 
            function GetVar(index: Cardinal): XVar;overload;
            function GetVar(const index: string): XVar;overload;
@@ -69,6 +71,7 @@ XVar =  record
            property AsFloat: XFloat read GetFloat write SetFloat;
            property AsBoolean: Boolean read GetBoolean write SetBoolean;
            property AsString: String read GetString write SetString;
+           property AsObject: TObject read GetObj write SetObj;
 
            property Vars[index: cardinal]: XVar read GetVar;default;
            property Keys[Index: Cardinal]: XVar read GetKey;
@@ -192,6 +195,8 @@ begin
    xtBoolean: Result:= FInstance^.Data.Bool;
    xtInteger: Result:= FInstance^.Data.Int<>0;
      xtFloat: Result:= FInstance^.Data.Float<>0;
+    //xtString: Result:=FInstance^.Data.Str.GetStr<>''; is this correct assumption???
+     xtNativeObject: Result:= FInstance^.Data.Obj<>nil;
   end;
 end;
 
@@ -244,6 +249,19 @@ begin
         xtString: FInstance^.Data.Str.SetStr(FloatToStr(AValue));
         else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtFloat),XTypeName(VarType)]);
   end
+end;
+
+function XVar.GetObj: TObject;
+begin
+  if VarType<>xtNativeObject then Result:=nil
+   else Result:=FInstance^.Data.Obj;
+end;
+
+procedure XVar.SetObj(AValue: TObject);
+begin
+  if VarType=xtNativeObject
+   then FInstance^.Data.Obj:=AValue
+   else raise EXONException.CreateFmt(XON_Assign_Exception,[XTypeName(xtNativeObject),XTypeName(VarType)]);
 end;
 
 function XVar.Assigned:Boolean; inline;

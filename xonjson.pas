@@ -32,6 +32,8 @@ type
                end;
 
 
+ function JSON2XON(const JS: String): XVar;
+
 implementation
 
 
@@ -259,6 +261,21 @@ begin
     end;
   end;
   if FDepth>0 then result:= JSON_ERROR_PARTIAL  // not all containners are closed .... unbalanced brackets
+end;
+
+function JSON2XON(const JS: String): XVar;
+var P: TJSONParser;
+    r: Integer;
+begin
+  try
+   Result:=XVar.Null;
+   P:=TJSONParser.Create;
+   r:=P.Parse(JS);
+   Result:=P.UseXON;
+   if r<=0 then Result.Free;
+  finally
+    P.Free;
+  end;
 end;
 
 end.
