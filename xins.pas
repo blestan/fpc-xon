@@ -48,10 +48,12 @@ type
                         InlineSz=12; // do not modify ... binary persistance comptibility will be broken!
                     private
                         FLen: Integer;
+                        DataPtr: PChar;
                     public
                         Procedure SetStr(const S: String);overload;
                         Procedure SetStr (P: PChar; Len: Integer);overload;
                         Function GetStr: String;
+                        function Compare( const S: String): Integer;
                     private
                      case integer of
                         0: ( FChars: array[01..InlineSz] of char); //  inline characters
@@ -69,6 +71,7 @@ type
                      xtArray,
                       xtList: (Container: PXContainer;
                                Parent: PXInstance;);
+                      xtInt64: (BigInt: Int64);
                       xtGUID: (GUID: TGuid);
                       xtNativeObject: (Obj: TObject);
              end;

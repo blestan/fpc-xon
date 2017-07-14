@@ -48,10 +48,19 @@ XVar =  record
 
            class function New(AType: XType):XVar;static; //Create New ROOT Variable
            class function New(AType: XType; AParent: XVar): XVar;static; // Create New Variable as child of an existing xon
+           class function NewList(AParent: XVar; InitialSize: Cardinal=0): XVar; static;// Create new list as child
+           class function NewList(InitialSize: Cardinal=0): XVar; static;// Create new root list
+           class function NewArray(AParent: XVar; InitialSize: Cardinal=0): XVar; static;// Create new  Array as child
+           class function NewArray(InitialSize: Cardinal=0): XVar; static;// Create new root array
 
            function Add(AType: XType): XVar; // Add new child in Array
-
            function Add(AType: XType;const AKey:String): XVar; // Add new child with string key in List
+
+           function AddList(InitialSize: Cardinal=0): XVar;// add new List in array
+           function AddArray(InitialSize: Cardinal=0): XVar;// add new  Array in array
+
+           function AddList(const AKey:String; InitialSize: Cardinal=0): XVar;// add new List in list
+           function AddArray(const AKey:String; InitialSize: Cardinal=0): XVar;// add new  Array in list
 
 
            function Serialize( ASerializer: IXSerializer ): boolean;
@@ -81,6 +90,12 @@ XVar =  record
            function isContainer: boolean;
            function IsNumeric: Boolean;
            function IsNull: Boolean;
+
+           // misc functions
+
+           function Find( const  AValue: String): Integer;
+
+           procedure Increment(By: Integer=1); // inc if var is numeric
          end;
 
 IXSerializer=Interface
@@ -90,7 +105,7 @@ IXSerializer=Interface
 
  IXDeserializer=Interface
 
-             function ReadXON(const AParent: XVar):XVar; // true if write successful
+             function ReadXON(const AParent: XVar):XVar; // not null if read successful
  end;
 
 resourcestring
@@ -113,6 +128,14 @@ begin
   Result:=XInstance.Size;
 end;
 
+procedure XVar.Free;
+begin
+ if Assigned then
+   begin
+     FInstance^.Free;
+     FInstance:=nil;
+   end
+end;
 
 // create a root
 class function XVar.New(AType: XType): XVar;inline;
@@ -126,13 +149,28 @@ begin
  Result.FInstance:=XInstance.Alloc(AType,AParent.FInstance);
 end;
 
-procedure XVar.Free;
+class function XVar.NewList(AParent: XVar; InitialSize: Cardinal=0): XVar;
 begin
- if Assigned then
-   begin
-     FInstance^.Free;
-     FInstance:=nil;
-   end
+  Result:=New(xtList,AParent);
+  if InitialSize>0 then Result.FInstance^.InitContainer(InitialSize);
+end;
+
+class function XVar.NewList(InitialSize: Cardinal=0): XVar;
+begin
+  Result:=New(xtList);
+  if InitialSize>0 then Result.FInstance^.InitContainer(InitialSize);
+end;
+
+class function XVar.NewArray(AParent: XVar; InitialSize: Cardinal=0): XVar;
+begin
+  Result:=New(xtArray,AParent);
+  if InitialSize>0 then Result.FInstance^.InitContainer(InitialSize);
+end;
+
+class function XVar.NewArray(InitialSize: Cardinal=0): XVar;
+begin
+  Result:=New(xtArray);
+  if InitialSize>0 then Result.FInstance^.InitContainer(InitialSize);
 end;
 
 function XVar.Add(AType: XType): XVar;
@@ -150,6 +188,31 @@ begin
     end
      else Raise EXONException.Create(XON_Expand_Exception);
 end;
+
+function XVar.AddList(InitialSize: Cardinal=0): XVar;// add new List
+begin
+  Result:=Add(xtList);
+  if InitialSize>0 then Result.FInstance^.InitContainer(InitialSize);
+end;
+
+function XVar.AddArray(InitialSize: Cardinal=0): XVar;// add new  Array as child
+begin
+ Result:=Add(xtArray);
+ if InitialSize>0 then Result.FInstance^.InitContainer(InitialSize);
+end;
+
+function XVar.AddList(const AKey:String; InitialSize: Cardinal=0): XVar;
+begin
+  Result:=Add(xtList,AKey);
+  if InitialSize>0 then Result.FInstance^.InitContainer(InitialSize);
+end;
+
+function XVar.AddArray(const AKey:String; InitialSize: Cardinal=0): XVar;
+begin
+ Result:=Add(xtArray,AKey);
+ if InitialSize>0 then Result.FInstance^.InitContainer(InitialSize);
+end;
+
 
 function XVar.Serialize(ASerializer: IXSerializer): boolean;inline;
 begin
@@ -346,7 +409,22 @@ begin
    else Result:=XVar.Null;
 end;
 
+procedure XVar.Increment(by: Integer);
+begin
+ case VarType of
+   xtInteger: Inc(FInstance^.Data.Int,By);
+   xtInt64: Inc(FInstance^.Data.Int,By) ;
+   xtFloat: with FInstance^.Data do Float:=Float+By;
+ end
+end;
 
+function XVar.Find( const AValue: String): Integer;
+Var i: Integer;
+begin
+ Result:=-1;
+ if not isContainer then exit; // cannot search here
+ for i:=00 to Count-1 do if Vars[i].AsString=AValue then exit(i);
+end;
 
 end.
 
