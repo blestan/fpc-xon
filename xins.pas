@@ -17,7 +17,7 @@ type
 
 
 
-             XContainer= packed record
+             XContainer= record
                        private
                         const
                              PageSize = 32; // vars per page - keep this always power of 2 ( i.e 2,4,8,16..1024)  !!!!
@@ -46,23 +46,28 @@ type
              XStr = packed record
                     const
                         InlineSz=12; // do not modify ... binary persistance comptibility will be broken!
-                    private
+                    strict private
                         FLen: Integer;
-                        DataPtr: PChar;
                     public
+                        procedure Initialize;
+                        procedure Finalize;
                         Procedure SetStr(const S: String);overload;
-                        Procedure SetStr (P: PChar; Len: Integer);overload;
+                        Procedure SetStr (P: PChar; NewLen: Integer);overload;
                         Function GetStr: String;
+                        function StrPtr: PChar;
                         function Compare( const S: String): Integer;
+                        property Length: Integer read FLen;
+
                     private
                      case integer of
                         0: ( FChars: array[01..InlineSz] of char); //  inline characters
                         1: ( FNative: Pointer); // fpc string
-                        2: ( FCharBuf: PChar); // ptr to user managed buffer or chars  - to do!!!
+                       // 2: ( FCharBuf: PChar); // ptr to user managed buffer of chars  - to do in future !!!
               end;
 
              XVariant= packed record
                 case  Xtype of
+                   xtNull: (NextFreeIndex: Integer);
                    xtInteger: (Int: XInt);
                      xtFloat: (Float: XFloat);
                    xtBoolean: (Bool: Boolean);
@@ -71,22 +76,25 @@ type
                      xtArray,
                       xtList: (Container: PXContainer;
                                Parent: PXInstance;);
+                      xtDateTime: (DateTime: TDateTime);
+                      xtTimeStamp:(Date,Time: Integer);
                       xtInt64: (BigInt: Int64);
                       xtGUID: (GUID: TGuid);
                       xtNativeObject: (Obj: TObject);
              end;
 
-             XInstance =   packed record
+             XInstance =packed record
  	         Header: XHeader;
                    Data: XVariant;
+                 class function Alloc( AType: XType; AParent: PXInstance): PXInstance;static;
                  class function Size:Cardinal;static; // instance size
 
-                 procedure Init(AType: XType; AParent: PXInstance=nil);
-                 procedure InitContainer(InitialSize:Cardinal);
-                 class function Alloc( AType: XType; AParent: PXInstance): PXInstance;static;
-
+                 procedure Initialize(AType: XType; AParent: PXInstance=nil);
                  procedure Finalize;
+
                  procedure Free;
+
+                 procedure InitContainer(InitialSize:Cardinal);
 
                  function InstanceType: XType;
                  function Deleted:boolean;
@@ -168,49 +176,66 @@ end;
 
 // XStr
 
-procedure XStr.SetStr(P: PChar; Len: Integer);
+procedure XStr.Initialize;inline;
 begin
- if FLen>InlineSz then RawByteString(FNative):=''; // release previous string if any
- if Len<InlineSz  then
-  begin
-   FLen:=Len;
-   if Len<>0 then Move(P^,FChars[1],FLen);
-  end
+   FLen:=00;
+   FNative:=nil; // just in case
+end;
+
+procedure XStr.Finalize;inline;
+begin
+  if FLen>InlineSz then begin
+    RawByteString(FNative):=''; // release previous native string if any
+    FNative:=nil;
+  end;
+  FLen:=00; // or just set lenght to zero
+end;
+
+procedure XStr.SetStr(P: PChar; NewLen: Integer);
+begin
+ Finalize;
+ if NewLen=0 then exit;
+ FLen:=NewLen;
+ if NewLen<=InlineSz
+  then Move(P^,FChars[1],NewLen)
   else
    begin
-     FNative:=nil;
-     FLen:=High(FLen); // indicates native string
-     System.SetLength(RawByteString(FNative),Len);
-     Move(P^,RawByteString(FNative)[1],Len);
+     System.SetLength(RawByteString(FNative),NewLen);   //is raw str correct???
+     Move(P^,RawByteString(FNative)[1],NewLen);
    end
 end;
 
 procedure XStr.SetStr(const S:String);inline;
-Var Len: Cardinal;
 begin
-  if FLen>InlineSz then String(FNative):=''; // release previous string if any
-  Len:=System.Length(S);
-  if Len<InlineSz  then
-  begin
-   FLen:=Len;
-   if Len<>0 then Move(S[1],FChars[1],FLen);
-  end
-  else
-   begin
-     FNative:=nil;
-     FLen:=High(FLen); // indicates native string
-     String(FNative):=S;
-   end
+  Finalize;
+  FLen:=System.Length(S);
+  if FLen=0 then exit;
+  if FLen<=InlineSz
+    then Move(S[1],FChars[1],FLen)
+    else String(FNative):=S;
 end;
+
 Function XStr.GetStr: String;
 begin
  if FLen=0 then exit;
- if FLen<InlineSz then
+ if FLen<=InlineSz then
    begin
      System.SetLength(Result,FLen);
      Move(FChars[1],Result[1],Flen)
    end
     else Result:=String(FNative);
+end;
+
+function XStr.StrPtr: PChar;
+begin
+  if FLen=0 then exit(nil);
+  if FLen<=InlineSz then result:=@FChars[1]
+                    else result:=@RawByteString(FNative)[1];
+end;
+
+function XStr.Compare(const S: String):Integer;inline;
+begin
+ Result:=CompareByte(StrPtr^,S[1],FLen);
 end;
 
 // XInstance functions
@@ -231,7 +256,7 @@ begin
                  else Result:=GetMem(XInstance.Size); // we alloc mem for a root instance
 
 
- Result^.Init(AType,AParent);
+ Result^.Initialize(AType,AParent);
 end;
 
 procedure XInstance.Free;
@@ -251,31 +276,32 @@ begin
   Result:=Data.Container^.Expand;
 end;
 
-procedure XInstance.Init(AType: XType; AParent: PXInstance=nil);
+procedure XInstance.Initialize(AType: XType; AParent: PXInstance=nil);
 begin
  Header.VType:=ord(AType);
  if AParent=nil then Header.Attr:=FlagRoot
                 else Header.Attr:=0;
  case InstanceType of
-     xtString: Data.Str.FLen:=00;
+     xtString: Data.Str.Initialize;
      xtArray,xtList: begin
                         Data.Parent:=AParent;
                         Data.Container:=nil;
-                       end;
+                     end;
+     xtNativeObject: Data.Obj:=nil;
  end
 end;
 
 procedure XInstance.Finalize;
 begin
  case InstanceType of
-     xtString: Data.Str.SetStr('');
+     xtString: Data.Str.Finalize;
      xtArray,xtList: if Data.Container<>nil then
                          begin
                           Data.Container^.Finalize;
                           Freemem(Data.Container);
                           Data.Container:=nil;
                          end;
-     xtNativeObject: Data.Obj.Free;
+     xtNativeObject: Data.Obj.Free; // by default we own objects
  end;
 end;
 
