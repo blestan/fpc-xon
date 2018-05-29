@@ -93,9 +93,14 @@ XVar =  record
 
            // misc functions
 
+           //functions to find values in container;
            function Find( const  AValue: String): Integer;
 
+           //  functions tto compare var to a value
+           function Compare(const S: String): Integer;
+
            procedure Increment(By: Integer=1); // inc if var is numeric
+
          end;
 
 IXSerializer=Interface
@@ -234,7 +239,7 @@ begin
     xtString: Result:=FInstance^.Data.Str.GetStr;
     xtBoolean: if FInstance^.Data.Bool then Result:='True'
                                        else Result:='False';
-    xtGUID: Result:=GUIDToString(FInstance^.Data.GUID);
+    xtGUID: Result:=GUIDToString(FInstance^.Data.GUID^);
    end;
 end;
 
@@ -386,7 +391,7 @@ begin
  Result:=XVar.Null;
  if (VarType<>xtList) or (FInstance^.Data.Container=nil) then exit;
  for i:=00 to Count-1 do
-  if Keys[i].AsString=Index then
+  if Keys[i].Compare(Index)=0 then
     begin
       Result:=Vars[i];
       Break
@@ -423,8 +428,15 @@ Var i: Integer;
 begin
  Result:=-1;
  if not isContainer then exit; // cannot search here
- for i:=00 to Count-1 do if Vars[i].AsString=AValue then exit(i);
+ for i:=00 to Count-1 do if Vars[i].Compare(AValue)=0 then exit(i);
 end;
+
+function XVar.Compare(const S: String): integer;
+begin
+ if VarType=xtString then Result:=FInstance^.Data.Str.Compare(S)
+                     else Result:=-1;
+end;
+
 
 end.
 

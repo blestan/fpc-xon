@@ -19,12 +19,12 @@ type
                   FDepth: Integer; // Current Depth in the xon structure
                   FXON,           // Result of the parsing;
                   FSuper: XVar; //  Current Upper Container
-                  function internal_Parse(const js: string): integer;
                   function ParseBuf(Buf: PChar; BufLen: Integer): Integer;
                 public
                   constructor Create;
                   destructor Destroy;override;
                   function Parse(const js: string): integer;
+                  function Parse( js: PChar; Len: Integer): Integer;
                   procedure Reset;
                   function UseXON: XVar; // detach xon from parser - you must free XVar later.
                   property Position: Integer read FPos;
@@ -60,7 +60,7 @@ begin
    FPos:=0;
 end;
 
-function TJSONParser.UseXON:XVar;
+function TJSONParser.UseXON:XVar; // detach from parse for future use
 begin
    Result:=FXON;
    FXON:=XVar.Null;
@@ -68,7 +68,10 @@ end;
 
 function  TJSONParser.parse(const js: string): integer;
 begin
-   Result:=Internal_Parse(js);
+
+
+   if js<>'' then Result:=ParseBuf(@js[1],Length(js))
+             else result:=0;
    if (Result<0) and (FDepth>0) then // on error unwind back to the topmost container to avoid mem leaks
      begin
       FXON:=FSuper;
@@ -76,14 +79,17 @@ begin
      end;
 end;
 
-
-function  TJSONParser.internal_parse(const js: string): integer;
+function  TJSONParser.parse( js: PChar; len: integer): integer;
 begin
+  if len>0 then Result:=ParseBuf(js,len)
+           else Result:=0;
 
-  if js<>'' then Result:=ParseBuf(@js[1],Length(js))
-            else result:=0;
+   if (Result<0) and (FDepth>0) then // on error unwind back to the topmost container to avoid mem leaks
+     begin
+      FXON:=FSuper;
+       while FXON.Parent.Assigned do FXON:=FXON.Parent;
+     end;
 end;
-
 
 function TJSONParser.ParseBuf(Buf: PChar; BufLen: Integer): Integer;
 var

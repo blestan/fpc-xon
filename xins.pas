@@ -79,7 +79,7 @@ type
                       xtDateTime: (DateTime: TDateTime);
                       xtTimeStamp:(Date,Time: Integer);
                       xtInt64: (BigInt: Int64);
-                      xtGUID: (GUID: TGuid);
+                      xtGUID: (GUID: PGuid);
                       xtNativeObject: (Obj: TObject);
              end;
 
@@ -287,6 +287,7 @@ begin
                         Data.Parent:=AParent;
                         Data.Container:=nil;
                      end;
+     xtGUID: Data.GUID:=nil;
      xtNativeObject: Data.Obj:=nil;
  end
 end;
@@ -301,6 +302,7 @@ begin
                           Freemem(Data.Container);
                           Data.Container:=nil;
                          end;
+     xtGUID:if Data.GUID<>nil then FreeMem(Data.GUID);
      xtNativeObject: Data.Obj.Free; // by default we own objects
  end;
 end;
