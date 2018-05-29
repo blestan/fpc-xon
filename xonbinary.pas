@@ -201,7 +201,7 @@ end;
 
 begin
 
-FSuper:=XVar.Null;
+FSuper:=nullxon;
 Result:=ReadVar;
 
 end;

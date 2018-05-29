@@ -4,7 +4,10 @@ unit xonjson;
 
 interface
 
-uses xtypes,xon;
+uses
+
+  xtypes,
+  xon;
 
 const
   JSON_ERROR_NONE = 0;   // No error
@@ -40,8 +43,8 @@ implementation
 constructor TJSONParser.Create;
 begin
    inherited create;
-   FSuper:=XVar.Null;
-   FXON:=XVar.Null;
+   FSuper:=nullxon;
+   FXON:=nullxon;
    FDepth:=0;
    FPos:=0;
 end;
@@ -54,7 +57,7 @@ end;
 
 procedure TJSONParser.Reset;
 begin
-   FSuper:=XVar.Null;
+   FSuper:=nullxon;
    FXON.Free;
    FDepth:=0;
    FPos:=0;
@@ -63,7 +66,7 @@ end;
 function TJSONParser.UseXON:XVar; // detach from parse for future use
 begin
    Result:=FXON;
-   FXON:=XVar.Null;
+   FXON:=nullxon;
 end;
 
 function  TJSONParser.parse(const js: string): integer;
@@ -274,7 +277,7 @@ var P: TJSONParser;
     r: Integer;
 begin
   try
-   Result:=XVar.Null;
+   Result:=nullxon;
    P:=TJSONParser.Create;
    r:=P.Parse(JS);
    Result:=P.UseXON;

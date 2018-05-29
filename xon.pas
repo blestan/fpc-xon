@@ -7,7 +7,8 @@
 }
 unit xon;
 
-{$mode objfpc}{$H+}
+{$mode objfpc}
+{$H+}
 {$modeswitch advancedrecords}
 
 interface
@@ -35,12 +36,13 @@ XVar =  record
            function GetObj: TObject;
            procedure SetObj(AValue: TObject);
 
+
+
            function GetVar(index: Cardinal): XVar;overload;
            function GetVar(const index: string): XVar;overload;
            function GetKey(index: Cardinal): XVar;
 
          public
-           const Null: XVar =( FInstance : Nil);
 
            function VarType: XType;
 
@@ -61,6 +63,7 @@ XVar =  record
 
            function AddList(const AKey:String; InitialSize: Cardinal=0): XVar;// add new List in list
            function AddArray(const AKey:String; InitialSize: Cardinal=0): XVar;// add new  Array in list
+
 
 
            function Serialize( ASerializer: IXSerializer ): boolean;
@@ -118,6 +121,7 @@ resourcestring
   XON_Expand_Exception='Cannot expand XON Container';
   XON_Assign_Exception='Wrong XON Assignment. Expented :%s: got :%s:';
 
+const NullXON: XVar =( FInstance : Nil);
 
 implementation
 
@@ -380,7 +384,7 @@ end;
 function XVar.Parent: XVar;inline;
 begin
  if isContainer then Result.FInstance:=FInstance^.Data.Parent
-                else Result:=null;
+                else Result:=nullxon;
 end;
 
 
@@ -388,7 +392,7 @@ end;
 function XVar.GetVar(const Index: String): XVar;
 var i: integer;
 begin
- Result:=XVar.Null;
+ Result:=Nullxon;
  if (VarType<>xtList) or (FInstance^.Data.Container=nil) then exit;
  for i:=00 to Count-1 do
   if Keys[i].Compare(Index)=0 then
@@ -401,7 +405,7 @@ end;
 
 function XVar.GetVar( Index: Cardinal): XVar;
 begin
- if (not isContainer) or (FInstance^.Data.Container=nil)  then exit(XVar.Null);
+ if (not isContainer) or (FInstance^.Data.Container=nil)  then exit(nullxon);
  if VarType=xtList then Index:=Succ(Index shl 1);
  Result.FInstance:=FInstance^.Data.Container^[Index];
 end;
@@ -411,7 +415,7 @@ function XVar.GetKey(Index: Cardinal): XVar;
 begin
  if (VarType=xtList) and (FInstance^.Data.Container<>nil)
    then Result.FInstance:=FInstance^.Data.Container^[Index shl 1]
-   else Result:=XVar.Null;
+   else Result:=nullxon;
 end;
 
 procedure XVar.Increment(by: Integer);
